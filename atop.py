@@ -16,12 +16,11 @@ from flask_basicauth import BasicAuth
 #import sys
 #sys.path.append('../')
 
-from elasticsearch import Elasticsearch
+#from elasticsearch import Elasticsearch
+#es = Elasticsearch('localhost', port=9200)
+
 
 app = Flask(__name__)
-
-es = Elasticsearch('localhost', port=9200)
-
 
 
 @app.route("/")
