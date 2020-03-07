@@ -27,6 +27,7 @@ topics_dict = { "title":[],
                 "score":[],
                 "upvote_ratio":[]}
 
+cnt = 0
 for submission in top_subreddit:
     topics_dict["title"].append(submission.title)
     topics_dict["score"].append(submission.score)
@@ -35,14 +36,19 @@ for submission in top_subreddit:
     topics_dict["comms_num"].append(submission.num_comments)
     topics_dict["created"].append(submission.created)
     topics_dict["body"].append(submission.selftext)
-    topics_dict["comments"].append([(c.author.name,c.body) for c in submission.comments if c is not None and isinstance(c, praw.models.reddit.comment.Comment) and c.author is not None])
+    # topics_dict["comments"].append([(c.author.name,c.body) for c in submission.comments if c is not None and isinstance(c, praw.models.reddit.comment.Comment) and c.author is not None])
+    topics_dict["comments"].append([{'created':get_date(c.created), 'author':c.author.name,'body':c.body} for c in submission.comments if c is not None and isinstance(c, praw.models.reddit.comment.Comment) and c.author is not None])
     topics_dict["is_original"].append(submission.is_original_content)
     topics_dict['upvote_ratio'].append(submission.upvote_ratio)
+    cnt+=1
+    print('Downloaded %d posts'%cnt)
 
+print('Done all downloading, converting dict to dataframe')
 topics_data = pd.DataFrame(topics_dict)
 _timestamp = topics_data["created"].apply(get_date)
 topics_data = topics_data.assign(timestamp = _timestamp)
 
+print('Saving data as JSON')
 topics_data.to_json('../data/reddit_post.json')
 
 # for comment in reddit.subreddit('Coronavirus').stream.comments():
