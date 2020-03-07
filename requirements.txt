@@ -1,0 +1,8 @@
+feedparser
+flask_basicauth
+pandas
+elasticsearch
+pdfminer
+bs4
+PyPDF2
+flask-bootstrap

@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve atop
+After=network.target
+
+[Service]
+User=cwu
+Group=www-data
+WorkingDirectory=/home/cwu/atop
+Environment="PATH=/home/cwu/atop/atop_env/bin"
+ExecStart=/home/cwu/atop/atop_env/bin/uwsgi --ini atop.ini
+
+[Install]
+WantedBy=multi-user.target

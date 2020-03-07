@@ -1,0 +1,9 @@
+server {    
+    listen 80;    
+    server_name atopintelligence.org www.atopintelligence.org;    
+
+    location / {        
+        include uwsgi_params;        
+        uwsgi_pass unix:/home/cwu/atop/atop.sock;    
+    }
+}
