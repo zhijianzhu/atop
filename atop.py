@@ -9,7 +9,7 @@ from flask import make_response
 
 import sqlite3
 from flask import g
-import pandas as pd
+#import pandas as pd
 
 from flask_basicauth import BasicAuth
 

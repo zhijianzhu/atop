@@ -1,8 +1,8 @@
-feedparser
+#feedparser
 flask_basicauth
 pandas
-elasticsearch
-pdfminer
+#elasticsearch
+#pdfminer
 bs4
-PyPDF2
+#PyPDF2
 flask-bootstrap
