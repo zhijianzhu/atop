@@ -1,32 +1,65 @@
-# Ref: https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-16-04
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
 
-import datetime
+import plotly.graph_objs as go
 
-from flask import Flask
-from flask import render_template
-from flask import request
-from flask import make_response
+import pandas as pd
+import numpy as np
 
-import sqlite3
-from flask import g
-#import pandas as pd
+#df = pd.read_csv('https://ndownloader.figsh.com/files/8261349')
 
-from flask_basicauth import BasicAuth
-
-#import sys
-#sys.path.append('../')
-
-#from elasticsearch import Elasticsearch
-#es = Elasticsearch('localhost', port=9200)
+df_Confirmed = pd.read_csv("data/time_series_19-covid-Confirmed.csv")
+df_Deaths = pd.read_csv("data/time_series_19-covid-Deaths.csv")
+df_Recovered = pd.read_csv("data/time_series_19-covid-Recovered.csv")
 
 
-app = Flask(__name__)
+countries = df_Confirmed['Country/Region'].unique()
+
+date_list = df_Confirmed.columns.to_list()
+date_list = date_list[4:]
+
+df =  df_Confirmed[df_Confirmed['Country/Region']=='Mainland China']
+df_1 =  df[df['Province/State']=='Hubei']
+df_2 =  df[df['Province/State']=='Anhui']
 
 
-@app.route("/")
-def about():
-    return render_template("about.html")
+app = dash.Dash()
 
-
-if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+app = dash.Dash()
+colors = {
+    'background': '#111111',
+    'text': '#7FDBFF'
+}
+app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+    html.H1(
+        children='Hello World',
+        style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }
+    ),
+    html.Div(children='COVID-19 Tracking and Modelling', style={
+        'textAlign': 'center',
+        'color': colors['text']
+    }),
+    dcc.Graph(
+        id='Graph1',
+        figure={
+            'data': [
+                {'x': date_list, 'y': list(df_1[date_list]), 'type': 'bar', 'name': 'Wuhan'},
+                {'x': date_list, 'y': list(df_1[date_list]), 'type': 'bar', 'name': 'Anhui'},
+            ],
+            'layout': {
+                'plot_bgcolor': colors['background'],
+                'paper_bgcolor': colors['background'],
+                'font': {
+                    'color': colors['text']
+                }
+            }
+        }
+    )
+])
+    
+if __name__ == '__main__':
+    app.run_server(debug=True)
