@@ -7,6 +7,11 @@ import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import make_response
+
 #df = pd.read_csv('https://ndownloader.figsh.com/files/8261349')
 
 df_Confirmed = pd.read_csv("data/time_series_19-covid-Confirmed.csv")
@@ -23,12 +28,13 @@ df =  df_Confirmed[df_Confirmed['Country/Region']=='Mainland China']
 df_1 =  df[df['Province/State']=='Hubei']
 df_2 =  df[df['Province/State']=='Anhui']
 
-Wuhan = np.array(df_1[date_list])[0]
-
 
 app = dash.Dash()
 
-app = dash.Dash()
+server = Flask(__name__)
+app = dash.Dash(server=server)
+
+
 colors = {
     'background': '#111111',
     'text': '#7FDBFF'
@@ -64,4 +70,4 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 ])
     
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False, port=5000)
