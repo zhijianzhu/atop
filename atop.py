@@ -23,6 +23,8 @@ df =  df_Confirmed[df_Confirmed['Country/Region']=='Mainland China']
 df_1 =  df[df['Province/State']=='Hubei']
 df_2 =  df[df['Province/State']=='Anhui']
 
+Wuhan = np.array(df_1[date_list])[0]
+
 
 app = dash.Dash()
 
@@ -47,8 +49,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         id='Graph1',
         figure={
             'data': [
-                {'x': date_list, 'y': list(df_1[date_list]), 'type': 'bar', 'name': 'Wuhan'},
-                {'x': date_list, 'y': list(df_1[date_list]), 'type': 'bar', 'name': 'Anhui'},
+                {'x': date_list, 'y': list(np.array(df_1[date_list])[0]), 'type': 'bar', 'name': 'Wuhan'},
+                {'x': date_list, 'y': list(np.array(df_2[date_list])[0]), 'type': 'bar', 'name': 'Anhui'},
             ],
             'layout': {
                 'plot_bgcolor': colors['background'],
