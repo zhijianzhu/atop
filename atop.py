@@ -1,5 +1,10 @@
 import os
 
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import make_response
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -67,5 +72,20 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     )
 ])
 
-if __name__ == '__main__':
-    app.run_server(debug=False)
+
+app_0 = Flask(__name__)
+
+
+@app_0.route("/")
+def about():
+    return render_template("about.html")
+
+if 1:
+    
+    if __name__ == "__main__":
+        app_0.run(host='0.0.0.0')
+
+else:
+        
+    if __name__ == '__main__':
+        app.run_server(host='0.0.0.0',debug=False)
