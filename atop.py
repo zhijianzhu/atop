@@ -1,18 +1,11 @@
+import os
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 
-import plotly.graph_objs as go
-
 import pandas as pd
 import numpy as np
-
-from flask import Flask
-from flask import render_template
-from flask import request
-from flask import make_response
-
-#df = pd.read_csv('https://ndownloader.figsh.com/files/8261349')
 
 df_Confirmed = pd.read_csv("data/time_series_19-covid-Confirmed.csv")
 df_Deaths = pd.read_csv("data/time_series_19-covid-Deaths.csv")
@@ -28,11 +21,16 @@ df =  df_Confirmed[df_Confirmed['Country/Region']=='Mainland China']
 df_1 =  df[df['Province/State']=='Hubei']
 df_2 =  df[df['Province/State']=='Anhui']
 
+df =  df_Confirmed[df_Confirmed['Country/Region']=='US']
 
-app = dash.Dash()
+df = df.fillna(0)
+confirmed_number = np.sum(np.array(df[date_list]),axis=0)
 
-server = Flask(__name__)
-app = dash.Dash(server=server)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+server = app.server
 
 
 colors = {
@@ -55,8 +53,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         id='Graph1',
         figure={
             'data': [
-                {'x': date_list, 'y': list(np.array(df_1[date_list])[0]), 'type': 'bar', 'name': 'Wuhan'},
-                {'x': date_list, 'y': list(np.array(df_2[date_list])[0]), 'type': 'bar', 'name': 'Anhui'},
+              #  {'x': date_list, 'y': list(np.array(df_1[date_list])[0]), 'type': 'bar', 'name': 'Wuhan'},
+                {'x': date_list, 'y': list(confirmed_number), 'mode': 'lines+markers', 'name': 'USA'},
             ],
             'layout': {
                 'plot_bgcolor': colors['background'],
@@ -68,6 +66,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         }
     )
 ])
-    
+
 if __name__ == '__main__':
-    app.run_server(debug=False, port=5000)
+    app.run_server(debug=False)
