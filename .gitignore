@@ -1,4 +1,4 @@
 .DS_Store
-.spyproject
+.spyproject/
 *.pyc
-atop_env
+atop_env/
