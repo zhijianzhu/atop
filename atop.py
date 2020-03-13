@@ -33,10 +33,8 @@ confirmed_number = np.sum(np.array(df[date_list]),axis=0)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-server = app.server
-
+server = flask.Flask(__name__)
+app = dash.Dash(__name__, server=server)
 
 colors = {
     'background': '#111111',
@@ -72,20 +70,5 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     )
 ])
 
-
-app_0 = Flask(__name__)
-
-
-@app_0.route("/")
-def about():
-    return render_template("about.html")
-
-if 1:
-    
-    if __name__ == "__main__":
-        app_0.run(host='0.0.0.0')
-
-else:
-        
-    if __name__ == '__main__':
-        app.run_server(host='0.0.0.0',debug=False)
+if __name__ == "__main__":
+    app.run_server(host="0.0.0.0",debug=True,port=5000)
