@@ -17,7 +17,6 @@ df_Confirmed = pd.read_csv("data/time_series_19-covid-Confirmed.csv")
 df_Deaths = pd.read_csv("data/time_series_19-covid-Deaths.csv")
 df_Recovered = pd.read_csv("data/time_series_19-covid-Recovered.csv")
 
-
 countries = df_Confirmed['Country/Region'].unique()
 
 date_list = df_Confirmed.columns.to_list()
@@ -74,5 +73,5 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
 if __name__ == "__main__":
     app.run_server(host="0.0.0.0",debug=True, port=5000)
-    #app_0.run(host='0.0.0.0')
+    #app.run(host='0.0.0.0')
 
