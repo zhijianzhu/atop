@@ -66,13 +66,13 @@ data = [ dict(
             color = df_conf['total'],
             cmax = df_conf['total'].max(),
             colorbar=dict(
-                title="CoronaVirus Confirmed Total as of " + current_time
+                title="Confirmed Total"
             )
         ))]
 
 
 layout = dict(
-        title = 'CoronaVirus Confirmed Total',
+        title = 'CoronaVirus Confirmed Total of ' + current_time ,
         height = 700,
         colorbar = True,
         geo = dict(
@@ -119,13 +119,13 @@ data_d = [ dict(
             color = df_deaths['total'],
             cmax = df_deaths['total'].max(),
             colorbar=dict(
-                title="CoronaVirus Deaths Total as of " + current_time
+                title="Deaths Total"
             )
         ))]
 
 
 layout_d = dict(
-        title = 'CoronaVirus Death Total as of 2020/03/13',
+        title = 'CoronaVirus Death Total as of ' + current_time,
         height = 700,
         colorbar = True,
         geo = dict(
@@ -147,4 +147,7 @@ app.layout  = html.Div([
 ])
 
 if __name__ == '__main__':
+    
+    
+    
     app.run_server(debug=False, port=5000)
