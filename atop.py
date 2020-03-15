@@ -6,6 +6,8 @@ import pandas as pd
 import plotly.express as px
 
 import flask
+import utilities as utl
+
 from datetime import date
 
 current_time = str(date.today())
@@ -14,6 +16,11 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 server = flask.Flask(__name__)
 app = dash.Dash(__name__, server=server)
+
+colors = {
+    'background': '#111111',
+    'text': '#7FDBFF'
+}
 
 # print('reading the csv')
 df_conf = pd.read_csv('data/time_series_19-covid-Confirmed.csv')
@@ -41,53 +48,6 @@ median_val = df_conf['total'].median()
 scl = [[0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"],\
             [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(240, 210, 250)"]]
 
-data = [ dict(
-        type = 'scattergeo',
-        #locationmode =  #'USA-states',
-        locations="iso_alpha",
-        lon = df_conf['Long'],
-        lat = df_conf['Lat'],
-        text = df_conf['text'],
-        mode = 'markers',
-        marker = dict(
-            size = 8,
-            opacity = 0.8,
-            reversescale = True,
-            autocolorscale = False,
-            symbol = 'circle',
-            line = dict(
-                width=1,
-                color='rgba(102, 102, 102)'
-            ),
-            # colorscale = scl,
-            color_continuous_scale=px.colors.diverging.BrBG,
-            color_continuous_midpoint = median_val,
-            cmin = 0,
-            color = df_conf['total'],
-            cmax = df_conf['total'].max(),
-            colorbar=dict(
-                title="Confirmed Total"
-            )
-        ))]
-
-
-layout = dict(
-        title = 'CoronaVirus Confirmed Total of ' + current_time ,
-        height = 700,
-        colorbar = True,
-        geo = dict(
-            # scope='usa',
-            projection= 'natural earth', #dict( type='albers usa' ),
-            showland = True,
-            landcolor = "rgb(250, 250, 250)",
-            subunitcolor = "rgb(217, 217, 217)",
-            countrycolor = "rgb(217, 217, 217)",
-            countrywidth = 0.5,
-            subunitwidth = 0.5
-        ),
-    )
-
-fig = dict( data=data, layout=layout )    
 
 df_deaths['text'] = df_deaths.apply(get_text,axis=1)
 
@@ -95,59 +55,29 @@ scl = [ [0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"
     [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(220, 220, 220)"] ]
 
 median_val_d = df_deaths['total'].median()
-data_d = [ dict(
-        type = 'scattergeo',
-        #locationmode =  #'USA-states',
-        locations="iso_alpha",
-        lon = df_deaths['Long'],
-        lat = df_deaths['Lat'],
-        text = df_deaths['text'],
-        mode = 'markers',
-        marker = dict(
-            size = 8,
-            opacity = 0.8,
-            reversescale = True,
-            autocolorscale = False,
-            symbol = 'circle',
-            line = dict(
-                width=1,
-                color='rgba(102, 102, 102)'
-            ),
-            color_continuous_scale=px.colors.diverging.Fall,
-            color_continuous_midpoint = median_val_d,
-            cmin = 0,
-            color = df_deaths['total'],
-            cmax = df_deaths['total'].max(),
-            colorbar=dict(
-                title="Deaths Total"
-            )
-        ))]
 
 
-layout_d = dict(
-        title = 'CoronaVirus Death Total as of ' + current_time,
-        height = 700,
-        colorbar = True,
-        geo = dict(
-            # scope='usa',
-            projection= 'natural earth', #dict( type='albers usa' ),
-            showland = True,
-            landcolor = "rgb(250, 250, 250)",
-            subunitcolor = "rgb(217, 217, 217)",
-            countrycolor = "rgb(217, 217, 217)",
-            countrywidth = 0.5,
-            subunitwidth = 0.5
-        ),
-    )
+data, layout = utl.config_geo_layout(df_conf, px, median_val, current_time)
+fig = dict( data=data, layout=layout)    
+
+
+        
+data_d, layout_d = utl.config_geo_layout(df_deaths, px, median_val, current_time)
+
 fig_d = dict( data=data_d, layout=layout_d )    
 
 app.layout  = html.Div([
+    html.H1(
+        children='COVID-19 Tracking and Modelling',
+        style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }
+    ),
     dcc.Graph(id='virus_c_graph', figure=fig),
     dcc.Graph(id='virus_d_graph', figure=fig_d)
 ])
 
 if __name__ == '__main__':
-    
-    
     
     app.run_server(debug=False, port=5000)
