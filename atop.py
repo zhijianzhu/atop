@@ -22,11 +22,7 @@ external_stylesheets=[dbc.themes.BOOTSTRAP]
 
 
 server = flask.Flask(__name__)
-<<<<<<< HEAD
 app = dash.Dash(__name__, server=server, external_stylesheets=external_stylesheets)
-=======
-app = dash.Dash(__name__, server=server,external_stylesheets = external_stylesheets )
->>>>>>> 22a2101ff71d6695c8916179683f4671f74454fe
 app.title = 'CADSEA 2020'
 
 colors = {
@@ -121,7 +117,32 @@ def render_content(tab):
                 }
             }
          ),
+    
+           html.H3('Death Cases'), 
+           dcc.Graph(
+            id='Graph1',
+            figure={
+                'data': data_list_deaths,
+                'layout': {
+                    'plot_bgcolor': colors['background'],
+                    'paper_bgcolor': colors['background'],
+                    'font': {'color': colors['text']}
+                }
+            }
+         ),
         
+           html.H3('Recovered Cases'), 
+           dcc.Graph(
+            id='Graph1',
+            figure={
+                'data': data_list_recovered,
+                'layout': {
+                    'plot_bgcolor': colors['background'],
+                    'paper_bgcolor': colors['background'],
+                    'font': {'color': colors['text']}
+                }
+            }
+         ),
       ])
     elif tab == 'tab-2':
         return html.Div([
