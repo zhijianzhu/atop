@@ -18,7 +18,8 @@ current_time = str(date.today())
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 server = flask.Flask(__name__)
-app = dash.Dash(__name__, server=server)
+app = dash.Dash(__name__, server=server, external_stylesheets=external_stylesheets)
+app.title = 'CADSEA 2020'
 
 colors = {
     'background': '#111111',
