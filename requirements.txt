@@ -1,14 +1,17 @@
-#feedparser
 flask_basicauth
 pandas
-#elasticsearch
-#pdfminer
-bs4
-#PyPDF2
 flask-bootstrap
+<<<<<<< HEAD
 dash==0.21.1  
 dash-renderer==0.13.0  
 dash-html-components==0.11.0
 dash-core-components==0.24.0  
+=======
+dash
+dash-renderer
+dash-html-components
+dash-core-components
+dash-bootstrap-components
+>>>>>>> 22a2101ff71d6695c8916179683f4671f74454fe
 plotly
 wget
