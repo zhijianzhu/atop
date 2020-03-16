@@ -97,3 +97,18 @@ def load_data():
     #print(data_list_confirmed)
     
     return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
+
+
+def organize_figure_structure(data, colors):
+    
+    
+    figure_data = {
+          'data': data,
+          'layout': {
+                    'plot_bgcolor': colors['background'],
+                    'paper_bgcolor': colors['background'],
+                    'font': {'color': colors['text']}
+                }
+        }
+     
+    return figure_data

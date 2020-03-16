@@ -99,50 +99,22 @@ app.layout = html.Div([
     html.Div(id='tabs-content')
 ])
 
-@app.callback(Output('tabs-content', 'children'),
-              [Input('tabs', 'value')])
+@app.callback(Output('tabs-content', 'children'), [Input('tabs', 'value')])
+
+#section_style = {'textAlign': 'center', 'color': colors['text']}
 
 def render_content(tab):
     if tab == 'tab-1':
         return html.Div([
-           html.H3('Confirmed Cases'), 
-           dcc.Graph(
-            id='Graph1',
-            figure={
-                'data': data_list_confirmed,
-                'layout': {
-                    'plot_bgcolor': colors['background'],
-                    'paper_bgcolor': colors['background'],
-                    'font': {'color': colors['text']}
-                }
-            }
-         ),
+               html.H3(children='Confirmed case', 
+                       style={'textAlign': 'center', 'color': colors['text']}
+              ),
     
-           html.H3('Death Cases'), 
-           dcc.Graph(
-            id='Graph1',
-            figure={
-                'data': data_list_deaths,
-                'layout': {
-                    'plot_bgcolor': colors['background'],
-                    'paper_bgcolor': colors['background'],
-                    'font': {'color': colors['text']}
-                }
-            }
+            dcc.Graph(
+                id='Graph1',
+                figure = utl.organize_figure_structure(data_list_confirmed, colors)
          ),
         
-           html.H3('Recovered Cases'), 
-           dcc.Graph(
-            id='Graph1',
-            figure={
-                'data': data_list_recovered,
-                'layout': {
-                    'plot_bgcolor': colors['background'],
-                    'paper_bgcolor': colors['background'],
-                    'font': {'color': colors['text']}
-                }
-            }
-         ),
       ])
     elif tab == 'tab-2':
         return html.Div([
