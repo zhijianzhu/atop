@@ -1,10 +1,10 @@
 import requests
 import json
-import pandas as pd 
+import pandas as pd
 
 headers = {'Authorization': 'dc70f60f4aab4cfcaeffba24b1ded39d'}
 
-http://newsapi.org/v2/top-headlines?sources=google-news&apiKey=dc70f60f4aab4cfcaeffba24b1ded39d
+http: // newsapi.org/v2/top-headlines?sources = google-news & apiKey = dc70f60f4aab4cfcaeffba24b1ded39d
 
 top_headlines_url = 'https://newsapi.org/v2/top-headlines'
 everything_news_url = 'https://newsapi.org/v2/everything'
