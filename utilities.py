@@ -191,7 +191,7 @@ def tab_1_layout():
     ])
 
 
-def tab_2_layout(fig, fig_d):
+def tab_2_layout():
 
     # load the data and layout at fly
     data, layout = config_geo_layout(px)
