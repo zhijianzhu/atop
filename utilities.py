@@ -10,6 +10,10 @@ import numpy as np
 import pandas as pd
 import dash_html_components as html
 import dash_core_components as dcc
+from datetime import date
+
+import plotly.express as px
+
 
 colors = {
     'background': '#111111',
@@ -17,7 +21,43 @@ colors = {
 }
 
 
-def config_geo_layout(df_conf, px, median_val, current_time):
+def config_geo_layout(px):
+
+    current_time = str(date.today())
+
+    # print('reading the csv')
+    df_conf = pd.read_csv('data/time_series_19-covid-Confirmed.csv')
+    date_cols = [c for c in df_conf.columns if '/20' in c]
+    df_conf['total'] = df_conf[date_cols].sum(axis=1)
+    df_conf = df_conf[df_conf['total'] > 0]
+
+    df_deaths = pd.read_csv('data/time_series_19-covid-Deaths.csv')
+    df_deaths['total'] = df_deaths[date_cols].sum(axis=1)
+    df_deaths = df_deaths[df_deaths['total'] > 0]
+
+    # print('done reading the csv file')
+
+    def get_text(r):
+        # print(r['Province/State'])
+        if str(r['Province/State']) != 'nan':
+            return r['Province/State'] + '<br>' + 'Confirmed: ' + str(r['total'])
+        else:
+            return r['Country/Region'] + '<br>' + 'Confirmed: ' + str(r['total'])
+
+    df_conf['text'] = df_conf.apply(get_text, axis=1)
+    median_val = df_conf['total'].median()
+
+    # scl = [ [0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"],\
+    #     [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(220, 220, 220)"] ]
+    scl = [[0, "rgb(5, 10, 172)"], [0.35, "rgb(40, 60, 190)"], [0.5, "rgb(70, 100, 245)"],
+           [0.6, "rgb(90, 120, 245)"], [0.7, "rgb(106, 137, 247)"], [1, "rgb(240, 210, 250)"]]
+
+    df_deaths['text'] = df_deaths.apply(get_text, axis=1)
+
+    scl = [[0, "rgb(5, 10, 172)"], [0.35, "rgb(40, 60, 190)"], [0.5, "rgb(70, 100, 245)"],
+           [0.6, "rgb(90, 120, 245)"], [0.7, "rgb(106, 137, 247)"], [1, "rgb(220, 220, 220)"]]
+
+    median_val_d = df_deaths['total'].median()
 
     data = [dict(
         type='scattergeo',
@@ -76,11 +116,7 @@ def load_data():
     #countries = df_Confirmed['Country/Region'].unique()
 
     date_list = df_Confirmed.columns.to_list()
-    date_list = date_list[4:-1]
-
-    #df =  df_Confirmed[df_Confirmed['Country/Region']=='Mainland China']
-    #df_1 =  df[df['Province/State']=='Hubei']
-    #df_2 =  df[df['Province/State']=='Anhui']
+    date_list = date_list[4:]
 
     region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran']
 
@@ -119,7 +155,11 @@ def organize_figure_structure(data):
 
     return figure_data
 
-def tab_1_layout(data_list_confirmed, data_list_deaths, data_list_recovered):
+def tab_1_layout():
+
+    # load data on the fly
+    print("loading data on the fly n tab_1_layout...")
+    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = load_data()
 
     return html.Div([
         html.H3(children='Confirmed case',
@@ -152,6 +192,13 @@ def tab_1_layout(data_list_confirmed, data_list_deaths, data_list_recovered):
 
 
 def tab_2_layout(fig, fig_d):
+
+    # load the data and layout at fly
+    data, layout = config_geo_layout(px)
+    fig = dict(data=data, layout=layout)
+
+    data_d, layout_d = config_geo_layout(px)
+    fig_d = dict(data=data_d, layout=layout_d)
 
     return html.Div([
         html.H3('Geo Distribution'),
