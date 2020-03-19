@@ -20,18 +20,37 @@ colors = {
     'text': '#7FDBFF'
 }
 
+def dataSource(category:int) -> str:
+    '''
+    Return the URL for the given category, which is one of the following:
+    Confirmed, Deaths, Recovered
+    
+    Return None if the given parameter is none of the above three.
+
+    '''
+    base_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
+
+    dataSources = {'Confirmed':'time_series_19-covid-Confirmed.csv',
+                   'Deaths':'time_series_19-covid-Deaths.csv',
+                   'Recovered':'time_series_19-covid-Recovered.csv'}
+    
+    fn = dataSources.get(category)
+    
+    return base_url+fn if fn else fn 
+
+  
 
 def config_geo_layout(px):
 
     current_time = str(date.today())
 
     # print('reading the csv')
-    df_conf = pd.read_csv('data/time_series_19-covid-Confirmed.csv')
+    df_conf = pd.read_csv(dataSource('Confirmed'))
     date_cols = [c for c in df_conf.columns if '/20' in c]
     df_conf['total'] = df_conf[date_cols].sum(axis=1)
     df_conf = df_conf[df_conf['total'] > 0]
 
-    df_deaths = pd.read_csv('data/time_series_19-covid-Deaths.csv')
+    df_deaths = pd.read_csv(dataSource('Deaths'))
     df_deaths['total'] = df_deaths[date_cols].sum(axis=1)
     df_deaths = df_deaths[df_deaths['total'] > 0]
 
@@ -109,9 +128,9 @@ def config_geo_layout(px):
 
 def load_data():
 
-    df_Confirmed = pd.read_csv("data/time_series_19-covid-Confirmed.csv")
-    df_Deaths = pd.read_csv("data/time_series_19-covid-Deaths.csv")
-    df_Recovered = pd.read_csv("data/time_series_19-covid-Recovered.csv")
+    df_Confirmed = pd.read_csv(dataSource("Confirmed"))
+    df_Deaths = pd.read_csv(dataSource("Deaths"))
+    df_Recovered = pd.read_csv(dataSource("Recovered"))
 
     #countries = df_Confirmed['Country/Region'].unique()
 
