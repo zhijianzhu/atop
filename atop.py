@@ -60,9 +60,9 @@ def render_content(tab):
     elif tab == 'tab-2':
         return utl.tab_2_layout()
     elif tab == 'tab-3':
-        return None
+        return utl.tab_3_layout()
     elif tab == 'tab-4':
-        return None
+        return utl.tab_4_layout()
 
 
 if __name__ == '__main__':

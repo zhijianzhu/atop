@@ -247,15 +247,50 @@ def tab_2_layout():
     ])
 
     
+    
+def search_by_zipcode(zipcode="21029"):
+    
+    df_conf = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')#('time_series_19-covid-Confirmed.csv')
+    date_cols = [c for c in df_conf.columns if '/20' in c]
+    date_cols = date_cols[-1]
+    
+    nomi = pgeocode.Nominatim('us')
+    zipinfo = nomi.query_postal_code(zipcode)
+    dist_vals = df_conf.apply(row_dist, axis = 1, zipinfo = zipinfo)
+    df_local = df_conf[dist_vals< 100]
+    df_local = df_local[date_cols]
+    
+    return df_local
+
+
+def tab_3_layout():
+ 
+    # display search result
+
+    return html.Div([
+        html.H3(children = 'Search by zipcode (US only)',
+                style={'textAlign': 'center', 'color': colors['text']}),
+                
+        html.Button(id='submit-button', n_clicks=0, children='Submit',
+                    style={'textAlign': 'center', 'color': colors['text']}),
+
+    ])
+
+    
+def tab_4_layout():
+ 
+    # display search result
+
+    return html.Div([
+        html.H3('under construction'),
+    ])
+   
+    
 if __name__ == "__main__":
     df_conf = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')#('time_series_19-covid-Confirmed.csv')
     date_cols = [c for c in df_conf.columns if '/20' in c]
     print('done reading data into dataframe')
 
-    nomi = pgeocode.Nominatim('us')
-    zipcode = "21029"
-    zipinfo = nomi.query_postal_code(zipcode)
-    dist_vals = df_conf.apply(row_dist, axis = 1, zipinfo = zipinfo)
-    df_local = df_conf[dist_vals< 100]
+    df_local = search_by_zipcode()
     
     print(df_local)
