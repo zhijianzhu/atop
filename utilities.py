@@ -155,9 +155,9 @@ def load_data():
     #countries = df_Confirmed['Country/Region'].unique()
 
     date_list = df_Confirmed.columns.to_list()
-    date_list = date_list[4:]
+    date_list = date_list[34:]
 
-    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran']
+    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran','Spain']
 
     def update_number_by_region(df=df_Confirmed):
         data_list = []
