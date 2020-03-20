@@ -14,6 +14,11 @@ from datetime import date
 
 import plotly.express as px
 
+from flask import jsonify
+import pgeocode
+import math
+
+
 
 colors = {
     'background': '#111111',
@@ -38,7 +43,22 @@ def dataSource(category:int) -> str:
     
     return base_url+fn if fn else fn 
 
-  
+def distance(origin, destination):
+    lat1, lon1 = origin
+    lat2, lon2 = destination
+    radius = 3959 # mile
+
+    dlat = math.radians(lat2-lat1)
+    dlon = math.radians(lon2-lon1)
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+        * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = radius * c
+    return d
+
+def row_dist(r, zipinfo):
+    dist = distance((zipinfo['latitude'], zipinfo['longitude']), (r['Lat'],r['Long']))
+    return dist 
 
 def config_geo_layout(px):
 
@@ -225,3 +245,17 @@ def tab_2_layout():
         dcc.Graph(id='virus_c_graph', figure=fig),
         dcc.Graph(id='virus_d_graph', figure=fig_d)
     ])
+
+    
+if __name__ == "__main__":
+    df_conf = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')#('time_series_19-covid-Confirmed.csv')
+    date_cols = [c for c in df_conf.columns if '/20' in c]
+    print('done reading data into dataframe')
+
+    nomi = pgeocode.Nominatim('us')
+    zipcode = "21029"
+    zipinfo = nomi.query_postal_code(zipcode)
+    dist_vals = df_conf.apply(row_dist, axis = 1, zipinfo = zipinfo)
+    df_local = df_conf[dist_vals< 100]
+    
+    print(df_local)
