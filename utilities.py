@@ -19,34 +19,34 @@ import pgeocode
 import math
 
 
-
 colors = {
     'background': '#111111',
     'text': '#7FDBFF'
 }
 
-def dataSource(category:int) -> str:
+def dataSource(category: int) -> str:
     '''
     Return the URL for the given category, which is one of the following:
     Confirmed, Deaths, Recovered
-    
+
     Return None if the given parameter is none of the above three.
 
     '''
     base_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
 
-    dataSources = {'Confirmed':'time_series_19-covid-Confirmed.csv',
-                   'Deaths':'time_series_19-covid-Deaths.csv',
-                   'Recovered':'time_series_19-covid-Recovered.csv'}
-    
+    dataSources = {'Confirmed': 'time_series_19-covid-Confirmed.csv',
+                   'Deaths': 'time_series_19-covid-Deaths.csv',
+                   'Recovered': 'time_series_19-covid-Recovered.csv'}
+
     fn = dataSources.get(category)
-    
-    return base_url+fn if fn else fn 
+
+    return base_url+fn if fn else fn
+
 
 def distance(origin, destination):
     lat1, lon1 = origin
     lat2, lon2 = destination
-    radius = 3959 # mile
+    radius = 3959  # mile
 
     dlat = math.radians(lat2-lat1)
     dlon = math.radians(lon2-lon1)
@@ -57,8 +57,8 @@ def distance(origin, destination):
     return d
 
 def row_dist(r, zipinfo):
-    dist = distance((zipinfo['latitude'], zipinfo['longitude']), (r['Lat'],r['Long']))
-    return dist 
+    dist = distance((zipinfo['latitude'], zipinfo['longitude']), (r['Lat'], r['Long']))
+    return dist
 
 def config_geo_layout(px):
 
@@ -98,41 +98,41 @@ def config_geo_layout(px):
 
     median_val_d = df_deaths['total'].median()
 
-    data = [dict(
+    data_d = [dict(
         type='scattergeo',
         # locationmode =  #'USA-states',
-            locations="iso_alpha",
-            lon=df_conf['Long'],
-            lat=df_conf['Lat'],
-            text=df_conf['text'],
-            mode='markers',
-            marker=dict(
-                size=8,
-                opacity=0.8,
-                reversescale=True,
-                autocolorscale=False,
-                symbol='circle',
-                line=dict(
-                    width=1,
-                    color='rgba(102, 102, 102)'
-                ),
-                # colorscale = scl,
-                color_continuous_scale=px.colors.diverging.BrBG,
-                color_continuous_midpoint=median_val,
-                cmin=0,
-                color=df_conf['total'],
-                cmax=df_conf['total'].max(),
-                colorbar=dict(
-                    title="Confirmed Total"
-                )
-            ))]
+        locations="iso_alpha",
+        showcountries=True,
+        lon=df_deaths['Long'],
+        lat=df_deaths['Lat'],
+        text=df_deaths['text'],
+        mode='markers',
+        marker=dict(
+            size=8,
+            opacity=0.8,
+            reversescale=True,
+            autocolorscale=False,
+            symbol='circle',
+            line=dict(
+                width=1,
+                color='rgba(102, 102, 102)'
+            ),
+            colorscale=scl,
+            # color_continuous_midpoint = median_val_d,
+            cmin=0,
+            color=df_deaths['total'],
+            cmax=df_deaths['total'].max(),
+            colorbar=dict(
+                title="CoronaVirus Deaths Total as of 2020/03/13"
+            )
+        ))]
 
-    layout = dict(
-        title='CoronaVirus Confirmed Total of ' + current_time,
+    layout_d = dict(
+        title='CoronaVirus Death Total as of 2020/03/13',
         height=700,
         colorbar=True,
         geo=dict(
-            # scope='usa',
+            scope='usa',
             projection='natural earth',  # dict( type='albers usa' ),
             showland=True,
             landcolor="rgb(250, 250, 250)",
@@ -143,7 +143,7 @@ def config_geo_layout(px):
         ),
     )
 
-    return data, layout
+    return data_d, layout_d
 
 
 def load_data():
@@ -157,7 +157,7 @@ def load_data():
     date_list = df_Confirmed.columns.to_list()
     date_list = date_list[34:]
 
-    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran','Spain']
+    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
 
     def update_number_by_region(df=df_Confirmed):
         data_list = []
@@ -233,64 +233,110 @@ def tab_1_layout():
 def tab_2_layout():
 
     # load the data and layout at fly
-    data, layout = config_geo_layout(px)
-    fig = dict(data=data, layout=layout)
-
     data_d, layout_d = config_geo_layout(px)
     fig_d = dict(data=data_d, layout=layout_d)
 
     return html.Div([
-        html.H3('Geo Distribution'),
+        dcc.Markdown('''
+            ### Please slide to choose a date. ###
+        '''),
 
-        dcc.Graph(id='virus_c_graph', figure=fig),
-        dcc.Graph(id='virus_d_graph', figure=fig_d)
+        dcc.Slider(
+            id='date-slider',
+            min=0,
+            max=len(date_cols) - 1,
+            step=None,
+            marks=dict((i, d) if i % 5 == 0 else (str(i), '') for i, d in enumerate(date_cols)),
+            value=len(date_cols) - 1,
+        ),
+
+        html.Div([
+            dcc.Markdown('### Please enter a zip code and input a radius (miles) ###'),
+            dcc.Input(id='my_zip', value='10010', type='text'),
+            html.Br(),
+            dcc.Input(id='radius', value=1000, type='number'),
+            # html.Label(children=' Miles'),
+            html.Div(id='count_local'),
+            dcc.Graph(id='virus_c_graph'),
+
+            dcc.Graph(id='virus_d_graph', figure=fig_d),
+        ])
     ])
 
-    
-    
+
 def search_by_zipcode(zipcode="21029"):
-    
-    df_conf = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')#('time_series_19-covid-Confirmed.csv')
+
+    # ('time_series_19-covid-Confirmed.csv')
+    df_conf = pd.read_csv(
+        'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
     date_cols = [c for c in df_conf.columns if '/20' in c]
     date_cols = date_cols[-1]
-    
+
     nomi = pgeocode.Nominatim('us')
     zipinfo = nomi.query_postal_code(zipcode)
-    dist_vals = df_conf.apply(row_dist, axis = 1, zipinfo = zipinfo)
-    df_local = df_conf[dist_vals< 100]
+    dist_vals = df_conf.apply(row_dist, axis=1, zipinfo=zipinfo)
+    df_local = df_conf[dist_vals < 100]
     df_local = df_local[date_cols]
-    
+
     return df_local
 
 
 def tab_3_layout():
- 
+
     # display search result
 
     return html.Div([
-        html.H3(children = 'Search by zipcode (US only)',
+        html.H3(children='Search by zipcode (US only)',
                 style={'textAlign': 'center', 'color': colors['text']}),
-                
+
         html.Button(id='submit-button', n_clicks=0, children='Submit',
                     style={'textAlign': 'center', 'color': colors['text']}),
 
     ])
 
-    
+
 def tab_4_layout():
- 
+
     # display search result
 
     return html.Div([
         html.H3('under construction'),
     ])
-   
-    
+
+
+def fetch_lat_long_by_name():
+    from geopy.geocoders import Nominatim
+    import pandas as pd
+
+    df_conf = pd.read_csv('../data/time_series_19-covid-Confirmed.csv')
+    df_us = df_conf[df_conf['Country/Region'] == 'US']
+    location_names = df_us['Province/State'].values.tolist()
+    geolocator = Nominatim(user_agent="corona")
+    unqueried = location_names
+    list_dict = []
+    while len(unqueried) > 0:
+        for l in location_names:
+            try:
+                if ',' not in l:
+                    location = geolocator.geocode(l + ' State')
+                else:
+                    location = geolocator.geocode(l)
+                unqueried.remove(l)
+                list_dict.append({'Province/State': l, 'Lat': location.latitude, 'Long': location.longitude})
+            except BaseException:
+                print('time out for querying %s' % l)
+
+    latlong_df = pd.DataFrame.from_records(list_dict)
+    latlong_df.to_csv('../data/lat_long_by_loc_name.csv')
+
+
 if __name__ == "__main__":
-    df_conf = pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')#('time_series_19-covid-Confirmed.csv')
+    # ('time_series_19-covid-Confirmed.csv')
+    df_conf = pd.read_csv(
+        'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
     date_cols = [c for c in df_conf.columns if '/20' in c]
     print('done reading data into dataframe')
 
     df_local = search_by_zipcode()
-    
+
     print(df_local)
