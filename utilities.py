@@ -11,6 +11,7 @@ import pandas as pd
 import dash_html_components as html
 import dash_core_components as dcc
 from datetime import date
+from datetime import timedelta
 
 import plotly.express as px
 
@@ -19,6 +20,8 @@ colors = {
     'background': '#111111',
     'text': '#7FDBFF'
 }
+
+
 
 def dataSource(category:int) -> str:
     '''
@@ -40,7 +43,7 @@ def dataSource(category:int) -> str:
 
   
 
-def config_geo_layout(px):
+def config_geo_layout():
 
     current_time = str(date.today())
 
@@ -137,7 +140,8 @@ def load_data():
     date_list = df_Confirmed.columns.to_list()
     date_list = date_list[4:]
 
-    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran']
+    # region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran']
+    region_of_interest = REGION_OF_INTEREST
 
     def update_number_by_region(df=df_Confirmed):
         data_list = []
@@ -161,62 +165,13 @@ def load_data():
     return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
 
 
-def organize_figure_structure(data):
-
-    figure_data = {
-        'data': data,
-        'layout': {
-            'plot_bgcolor': colors['background'],
-            'paper_bgcolor': colors['background'],
-            'font': {'color': colors['text']}
-        }
-    }
-
-    return figure_data
-
-def tab_1_layout():
-
-    # load data on the fly
-    print("loading data on the fly n tab_1_layout...")
-    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = load_data()
-
-    return html.Div([
-        html.H3(children='Confirmed case',
-                style={'textAlign': 'center', 'color': colors['text']}
-                ),
-
-        dcc.Graph(
-            id='Graph1',
-            figure=organize_figure_structure(data_list_confirmed)
-        ),
-
-        html.H3(children='Death case',
-                style={'textAlign': 'center', 'color': colors['text']}
-                ),
-
-        dcc.Graph(
-            id='Graph2',
-            figure=organize_figure_structure(data_list_deaths)
-        ),
-
-        html.H3(children='Recovered case',
-                style={'textAlign': 'center', 'color': colors['text']}
-                ),
-
-        dcc.Graph(
-            id='Graph3',
-            figure=organize_figure_structure(data_list_recovered)
-        )
-    ])
-
-
 def tab_2_layout():
 
     # load the data and layout at fly
-    data, layout = config_geo_layout(px)
+    data, layout = config_geo_layout()
     fig = dict(data=data, layout=layout)
 
-    data_d, layout_d = config_geo_layout(px)
+    data_d, layout_d = config_geo_layout( )
     fig_d = dict(data=data_d, layout=layout_d)
 
     return html.Div([

@@ -2,27 +2,17 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import dash_bootstrap_components as dbc
 
-import plotly.graph_objs as go
-import pandas as pd
-import numpy as np
+# import plotly.graph_objs as go
+# import pandas as pd
+# import numpy as np
 
-import flask
 import utilities as utl
-from utilities import colors
+# from utilities import colors
 
-#external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-external_stylesheets = [dbc.themes.BOOTSTRAP]
-
-
-server = flask.Flask(__name__)
-app = dash.Dash(__name__,
-                server=server,
-                external_stylesheets=external_stylesheets,
-                meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
-
-app.title = 'CADSEA 2020'
+from init import app, server  
+from src import tab1_byCountryRegion as tab_1 
+from src import tab2_GeoDisplay as tab_2
 
 app.layout = html.Div([
 
@@ -53,16 +43,19 @@ app.layout = html.Div([
 
 ])
 
+
+
 @app.callback(Output('tabs-content', 'children'), [Input('tabs', 'value')])
 def render_content(tab):
     if tab == 'tab-1':
-        return utl.tab_1_layout()
+        return tab_1.layout 
     elif tab == 'tab-2':
-        return utl.tab_2_layout()
+        return tab_2.layout 
     elif tab == 'tab-3':
         return None
     elif tab == 'tab-4':
         return None
+
 
 
 if __name__ == '__main__':
