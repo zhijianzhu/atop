@@ -337,13 +337,18 @@ def get_local_news_by_zipcode(zipcode='20171'):
 
 
 def show_news_list(zipcode="21029"):
-    news_list = get_local_news_by_zipcode(zipcode)
-
+    try:
+        news_list = get_local_news_by_zipcode(zipcode)
+    except:
+        news_list = []
+        
     ol = []
     for news in news_list:
         ol.append([news['title'], news['url']])
-
-    return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
+    try:
+        return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
+    except:
+        return html.Ol("API call limit")
 
 
 if __name__ == "__main__":

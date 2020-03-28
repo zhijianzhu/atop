@@ -28,8 +28,10 @@ def display_page(pathname):
         return app_1.App()
     elif pathname == "/search":
         return app_2.App()
-    else:
+    elif pathname == "/model":
         return app_3.load_layout()
+    else:
+        return Homepage()
 
 @app.callback(Output('output_1', 'children'),
               [Input('pop_dropdown', 'value')])
