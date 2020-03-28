@@ -24,10 +24,10 @@ body = dbc.Container(
             [
                 dbc.Col(
                     [
-                        html.H1("Heading 1"),
+                        html.H1("Covid 19 Status"),
                         html.P(
                             """
-                            This coronavirus is changing the world dramatically.
+                            This coronavirus spreading is changing the world dramatically.
                             """
                         ),
                         dbc.Button("View details", color="secondary"),

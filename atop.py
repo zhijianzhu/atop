@@ -3,17 +3,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-
-import flask
-
+# layout
 import app_1
 import app_2
+import app_3
 
 from homepage import Homepage
 
-
-import utilities as utl
-# from utilities import colors
 
 from init import app, server  
 
@@ -33,7 +29,7 @@ def display_page(pathname):
     elif pathname == "/search":
         return app_2.App()
     else:
-        return Homepage()
+        return app_3.load_layout()
 
 @app.callback(Output('output_1', 'children'),
               [Input('pop_dropdown', 'value')])
