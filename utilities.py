@@ -335,7 +335,7 @@ def get_local_news_by_zipcode(zipcode='20171'):
         return None
 
 
-def show_news_list(zipcode):
+def show_news_list(zipcode="21029"):
     news_list = get_local_news_by_zipcode(zipcode)
 
     ol = []

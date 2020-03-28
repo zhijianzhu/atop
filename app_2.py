@@ -18,6 +18,11 @@ from navbar import Navbar
 from plotly.validators.scatter.marker import SymbolValidator
 raw_symbols = SymbolValidator().values
 
+def load_data():
+    data, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data()
+    return data
+
+
 # navigation bar
 nav = Navbar()
 
@@ -37,20 +42,63 @@ search = dcc.Input(
 output_2 = html.Div(id='output_2',
                     children=[],
                     )
+
+output_22 = html.Div(id='output_22',
+                    children=[],
+                    )
+
+body = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.H2("Confirmed cases in tables"),
+                        dcc.Graph(
+                            figure=utl.organize_figure_structure(load_data())
+                        ),
+                    ]
+                ),
+            ]
+        ),
+
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.H2("Related news"),
+                        html.Ol(utl.show_news_list())
+
+                    ]
+                ),
+            ]
+        ),
+
+    ],
+
+    className="mt-4",
+)
+
 def App():
     layout = html.Div([
         nav,
         header,
         search,
-        output_2
+        output_2,
+        output_22,
+        body
     ])
     return layout
 
+
+
 def plot_figure(zipcode):
 
-    #data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
+    data, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
 
-    data, date_list = utl.search_by_zipcode(zipcode)
+    #data, date_list = utl.search_by_zipcode(zipcode)
+
+    print(data)
 
     data = [go.Scatter(x=date_list,
                        y=data,
@@ -72,16 +120,3 @@ def plot_figure(zipcode):
     )
     return graph
 
-
-def show_news_list(zipcode):
-    news_list = utl.get_local_news_by_zipcode(zipcode)
-    
-    ol = []
-    for news in news_list:
-        ol.append([news['title'], news['url']])
-        
-    # create ol list
-    html_ol_list = []
-
-    return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
-                

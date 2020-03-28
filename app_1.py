@@ -56,8 +56,8 @@ def plot_figure(region):
 
     data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
 
-    print(region, data_list_confirmed[region])
-    print("date list ", date_list)
+    #print(region, data_list_confirmed[region])
+    #print("date list ", date_list)
 
     data = [go.Scatter(x=date_list,
                        y=data_list_confirmed[region],

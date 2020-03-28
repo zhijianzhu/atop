@@ -18,12 +18,6 @@ def load_case_list(region="US"):
     return data_list_confirmed[region]
 
 
-layout = {
-    'plot_bgcolor': utl.colors['background'],
-    'paper_bgcolor': utl.colors['background'],
-    'font': {'color': utl.colors['text']}
-}
-
 body = dbc.Container(
     [
         dbc.Row(
@@ -49,7 +43,7 @@ body = dbc.Container(
                                 {"x": load_date_list(), "y": load_case_list("Italy"), 'mode': "lines+markers", 'name': 'Italy'}
 
                             ],
-                                "layout": layout
+                                "layout": utl.layout
                             }
                         ),
                     ]
