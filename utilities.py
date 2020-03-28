@@ -19,6 +19,9 @@ import pgeocode
 import math
 
 
+df_conf = pd.read_csv('data/time_series_19-covid-Confirmed.csv')
+date_cols = [c for c in df_conf.columns if '/20' in c]
+
 colors = {
     'background': '#111111',
     'text': '#7FDBFF'
@@ -34,13 +37,16 @@ def dataSource(category: int) -> str:
     '''
     base_url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/"
 
-    dataSources = {'Confirmed': 'time_series_19-covid-Confirmed.csv',
-                   'Deaths': 'time_series_19-covid-Deaths.csv',
-                   'Recovered': 'time_series_19-covid-Recovered.csv'}
+    dataSources = {'Confirmed': 'time_series_covid19_confirmed_global.csv',
+                   'Deaths': 'time_series_covid19_deaths_global.csv',
+                   'Recovered': 'time_series_covid19_recovered_global.csv'}
 
     fn = dataSources.get(category)
 
-    return base_url+fn if fn else fn
+    url_path = base_url+fn if fn else fn
+    #print("url path is ", url_path)
+
+    return url_path
 
 
 def distance(origin, destination):
@@ -180,6 +186,38 @@ def load_data():
 
     return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
 
+def load_data_2():
+
+    df_Confirmed = pd.read_csv(dataSource("Confirmed"))
+    df_Deaths = pd.read_csv(dataSource("Deaths"))
+    df_Recovered = pd.read_csv(dataSource("Recovered"))
+
+    #countries = df_Confirmed['Country/Region'].unique()
+
+    date_list = df_Confirmed.columns.to_list()
+    date_list = date_list[34:]
+
+    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
+
+    def update_number_by_region(df=df_Confirmed):
+        data_list = {}
+        for region in region_of_interest:
+            #print("region is ", region)
+            df_1 = df[df['Country/Region'] == region]
+            df_1 = df_1.fillna(0)
+
+            confirmed_number = list(np.sum(np.array(df_1[date_list]), axis=0))
+            confirmed_number = [int(x) for x in confirmed_number]
+            data_list[region] = confirmed_number
+        return data_list
+
+    data_list_confirmed = update_number_by_region(df_Confirmed)
+    data_list_deaths = update_number_by_region(df_Deaths)
+    data_list_recovered = update_number_by_region(df_Recovered)
+
+    # print(data_list_confirmed)
+
+    return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
 
 def organize_figure_structure(data):
 
@@ -241,6 +279,34 @@ def tab_2_layout():
             ### Please slide to choose a date. ###
         '''),
 
+    ])
+
+
+def search_by_zipcode(zipcode="21029"):
+
+    # ('time_series_19-covid-Confirmed.csv')
+    df_conf = pd.read_csv(dataSource("Confirmed"))
+
+    date_cols = [c for c in df_conf.columns if '/20' in c]
+    #date_cols = date_cols[-1]
+
+    nomi = pgeocode.Nominatim('us')
+    zipinfo = nomi.query_postal_code(zipcode)
+    dist_vals = df_conf.apply(row_dist, axis=1, zipinfo=zipinfo)
+    df_local = df_conf[dist_vals < 100]
+    df_local = df_local[date_cols]
+
+    return df_local, date_cols
+
+
+def tab_3_layout():
+
+    # display search result
+    return html.Div([
+        dcc.Markdown('''
+        ### Please slide to choose a date. ###
+    '''),
+
         dcc.Slider(
             id='date-slider',
             min=0,
@@ -249,49 +315,17 @@ def tab_2_layout():
             marks=dict((i, d) if i % 5 == 0 else (str(i), '') for i, d in enumerate(date_cols)),
             value=len(date_cols) - 1,
         ),
+    ]),
+    html.Div([
+        dcc.Markdown('### Please enter a zip code and input a radius (miles) ###'),
+        dcc.Input(id='my_zip', value='10010', type='text'),
+        html.Br(),
+        dcc.Input(id='radius', value=1000, type='number'),
+        # html.Label(children=' Miles'),
+        html.Div(id='count_local'),
+        dcc.Graph(id='virus_c_graph'),
 
-        html.Div([
-            dcc.Markdown('### Please enter a zip code and input a radius (miles) ###'),
-            dcc.Input(id='my_zip', value='10010', type='text'),
-            html.Br(),
-            dcc.Input(id='radius', value=1000, type='number'),
-            # html.Label(children=' Miles'),
-            html.Div(id='count_local'),
-            dcc.Graph(id='virus_c_graph'),
-
-            dcc.Graph(id='virus_d_graph', figure=fig_d),
-        ])
-    ])
-
-
-def search_by_zipcode(zipcode="21029"):
-
-    # ('time_series_19-covid-Confirmed.csv')
-    df_conf = pd.read_csv(
-        'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
-    date_cols = [c for c in df_conf.columns if '/20' in c]
-    date_cols = date_cols[-1]
-
-    nomi = pgeocode.Nominatim('us')
-    zipinfo = nomi.query_postal_code(zipcode)
-    dist_vals = df_conf.apply(row_dist, axis=1, zipinfo=zipinfo)
-    df_local = df_conf[dist_vals < 100]
-    df_local = df_local[date_cols]
-
-    return df_local
-
-
-def tab_3_layout():
-
-    # display search result
-
-    return html.Div([
-        html.H3(children='Search by zipcode (US only)',
-                style={'textAlign': 'center', 'color': colors['text']}),
-
-        html.Button(id='submit-button', n_clicks=0, children='Submit',
-                    style={'textAlign': 'center', 'color': colors['text']}),
-
+        #  dcc.Graph(id='virus_d_graph', figure=fig_d),
     ])
 
 
@@ -330,13 +364,70 @@ def fetch_lat_long_by_name():
     latlong_df.to_csv('../data/lat_long_by_loc_name.csv')
 
 
+def get_local_news_by_zipcode(zipcode='20171'):
+    from newsapi import NewsApiClient
+    from uszipcode import SearchEngine
+    from uszipcode import model
+
+    search = SearchEngine()
+    zipcode = str(zipcode)
+    zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
+    if zipcode_info.zipcode is not None:
+        lat, lng = zipcode_info.lat, zipcode_info.lng
+        radius = 100
+        res = search.query(
+            lat=lat,
+            lng=lng,
+            radius=radius,
+            sort_by= model.SimpleZipcode.population, #model.Zipcode.median_household_income,
+            ascending=False,
+            returns=20,
+        ) # get 20 biggest cities around 100 miles around the given zip code
+        
+        api = NewsApiClient(api_key='dc70f60f4aab4cfcaeffba24b1ded39d')
+        news_list = []
+        counties = set( [(r.post_office_city,r.state,r.county) for r in res])
+        for county in counties: ## for each city, find news that contains the city name or county name or state name
+            res_json = api.get_everything(qintitle='({} OR {} OR {}) AND coronavirus'.format(county[0],county[1],county[2]), sort_by='publishedAt', \
+            language='en')
+            if res_json['totalResults'] > 0:
+                news_list.append(res_json)
+        
+        all_news = [n['articles'] for n in news_list]
+        news_list = [item for sublist in all_news for item in sublist]
+        news_list = sorted(news_list,key=lambda a:a['publishedAt'],reverse=True)
+        
+        # just get the titles:
+        news_list = [news['title'] for news in news_list]
+        news_list = list(set(news_list))
+        # In [104]: news_list[0]
+        # Out[104]:
+        # {'source': {'id': None, 'name': 'Arlnow.com'},
+        #  'author': 'ARLnow.com',
+        #  'title': 'Another Jump in Coronavirus Cases in Arlington, Fairfax County',
+        #  'description': 'Arlington and Fairfax counties are continuing to report an expected -- but concerning -- upward trajectory in COVID-19 cases as testing continues to ramp up.\r\n\r\nAs of noon on Wednesday, Arlington had 46 known coronavirus cases, an increase from 36 cases on Tu…',
+        #  'url': 'https://www.arlnow.com/2020/03/25/another-jump-in-coronavirus-cases-in-arlington-fairfax-county/',
+        #  'urlToImage': 'https://s26551.pcdn.co/wp-content/uploads/2020/03/Screen-Shot-2020-03-25-at-12.34.32-PM.jpg',
+        #  'publishedAt': '2020-03-25T17:10:14Z',
+        #  'content': 'Arlington and Fairfax counties are continuing to report an expected — but concerning — upward trajectory in COVID-19 cases as testing continues to ramp up.\r\nAs of noon on Wednesday, Arlington had 46 known coronavirus cases, an increase from 36 cases on Tuesda… [+2164 chars]'}
+        print("searched result: ", zipcode, news_list)
+    
+        return news_list
+    else:
+        return None
+
+
 if __name__ == "__main__":
     # ('time_series_19-covid-Confirmed.csv')
-    df_conf = pd.read_csv(
-        'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
+    """
+    df_conf = pd.read_csv(dataSource("Confirmed"))
+
     date_cols = [c for c in df_conf.columns if '/20' in c]
     print('done reading data into dataframe')
 
-    df_local = search_by_zipcode()
+    df_local, date_cols = search_by_zipcode()
 
     print(df_local)
+    """
+    news_list = get_local_news_by_zipcode()
+    print(news_list)

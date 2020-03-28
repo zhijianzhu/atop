@@ -9,3 +9,4 @@ dash-bootstrap-components
 plotly
 wget
 epydemic
+newsapi-python
