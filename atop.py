@@ -2,7 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import dash_bootstrap_components as dbc
+
 
 import flask
 
@@ -12,13 +12,11 @@ import app_2
 from homepage import Homepage
 
 
-server = flask.Flask(__name__)
-app = dash.Dash(__name__,
-                server=server,
-                external_stylesheets=[dbc.themes.UNITED],
-                meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
+import utilities as utl
+# from utilities import colors
 
-app.title = 'CADSEA 2020'
+from init import app, server  
+
 
 app.config.suppress_callback_exceptions = True
 
@@ -55,7 +53,6 @@ def update_graph_2(zipcode):
 def update_graph_22(zipcode):
     news_list = app_2.show_news_list(zipcode)
     return news_list
-
 
 if __name__ == '__main__':
     app.run_server(debug=False, port=5000)

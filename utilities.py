@@ -11,6 +11,7 @@ import pandas as pd
 import dash_html_components as html
 import dash_core_components as dcc
 from datetime import date
+from datetime import timedelta
 
 import plotly.express as px
 
@@ -34,7 +35,7 @@ layout = {
 }
 
 
-def dataSource(category: int) -> str:
+def dataSource(category:int) -> str:
     '''
     Return the URL for the given category, which is one of the following:
     Confirmed, Deaths, Recovered
@@ -73,7 +74,7 @@ def row_dist(r, zipinfo):
     dist = distance((zipinfo['latitude'], zipinfo['longitude']), (r['Lat'], r['Long']))
     return dist
 
-def config_geo_layout(px):
+def config_geo_layout():
 
     current_time = str(date.today())
 
