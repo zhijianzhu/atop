@@ -27,6 +27,13 @@ colors = {
     'text': '#7FDBFF'
 }
 
+layout = {
+    'plot_bgcolor': colors['background'],
+    'paper_bgcolor': colors['background'],
+    'font': {'color': colors['text']}
+}
+
+
 def dataSource(category: int) -> str:
     '''
     Return the URL for the given category, which is one of the following:
@@ -232,63 +239,13 @@ def organize_figure_structure(data):
 
     return figure_data
 
-def tab_1_layout():
-
-    # load data on the fly
-    print("loading data on the fly n tab_1_layout...")
-    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = load_data()
-
-    return html.Div([
-        html.H3(children='Confirmed case',
-                style={'textAlign': 'center', 'color': colors['text']}
-                ),
-
-        dcc.Graph(
-            id='Graph1',
-            figure=organize_figure_structure(data_list_confirmed)
-        ),
-
-        html.H3(children='Death case',
-                style={'textAlign': 'center', 'color': colors['text']}
-                ),
-
-        dcc.Graph(
-            id='Graph2',
-            figure=organize_figure_structure(data_list_deaths)
-        ),
-
-        html.H3(children='Recovered case',
-                style={'textAlign': 'center', 'color': colors['text']}
-                ),
-
-        dcc.Graph(
-            id='Graph3',
-            figure=organize_figure_structure(data_list_recovered)
-        )
-    ])
-
-
-def tab_2_layout():
-
-    # load the data and layout at fly
-    data_d, layout_d = config_geo_layout(px)
-    fig_d = dict(data=data_d, layout=layout_d)
-
-    return html.Div([
-        dcc.Markdown('''
-            ### Please slide to choose a date. ###
-        '''),
-
-    ])
-
 
 def search_by_zipcode(zipcode="21029"):
 
-    # ('time_series_19-covid-Confirmed.csv')
     df_conf = pd.read_csv(dataSource("Confirmed"))
 
     date_cols = [c for c in df_conf.columns if '/20' in c]
-    #date_cols = date_cols[-1]
+    date_cols = date_cols[-1]
 
     nomi = pgeocode.Nominatim('us')
     zipinfo = nomi.query_postal_code(zipcode)
@@ -297,45 +254,6 @@ def search_by_zipcode(zipcode="21029"):
     df_local = df_local[date_cols]
 
     return df_local, date_cols
-
-
-def tab_3_layout():
-
-    # display search result
-    return html.Div([
-        dcc.Markdown('''
-        ### Please slide to choose a date. ###
-    '''),
-
-        dcc.Slider(
-            id='date-slider',
-            min=0,
-            max=len(date_cols) - 1,
-            step=None,
-            marks=dict((i, d) if i % 5 == 0 else (str(i), '') for i, d in enumerate(date_cols)),
-            value=len(date_cols) - 1,
-        ),
-    ]),
-    html.Div([
-        dcc.Markdown('### Please enter a zip code and input a radius (miles) ###'),
-        dcc.Input(id='my_zip', value='10010', type='text'),
-        html.Br(),
-        dcc.Input(id='radius', value=1000, type='number'),
-        # html.Label(children=' Miles'),
-        html.Div(id='count_local'),
-        dcc.Graph(id='virus_c_graph'),
-
-        #  dcc.Graph(id='virus_d_graph', figure=fig_d),
-    ])
-
-
-def tab_4_layout():
-
-    # display search result
-
-    return html.Div([
-        html.H3('under construction'),
-    ])
 
 
 def fetch_lat_long_by_name():
@@ -371,7 +289,7 @@ def get_local_news_by_zipcode(zipcode='20171'):
 
     search = SearchEngine()
     zipcode = str(zipcode)
-    zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
+    zipcode_info = search.by_zipcode(zipcode)  # get info for the given zip code
     if zipcode_info.zipcode is not None:
         lat, lng = zipcode_info.lat, zipcode_info.lng
         radius = 100
@@ -379,24 +297,24 @@ def get_local_news_by_zipcode(zipcode='20171'):
             lat=lat,
             lng=lng,
             radius=radius,
-            sort_by= model.SimpleZipcode.population, #model.Zipcode.median_household_income,
+            sort_by=model.SimpleZipcode.population,  # model.Zipcode.median_household_income,
             ascending=False,
             returns=20,
-        ) # get 20 biggest cities around 100 miles around the given zip code
-        
+        )  # get 20 biggest cities around 100 miles around the given zip code
+
         api = NewsApiClient(api_key='dc70f60f4aab4cfcaeffba24b1ded39d')
         news_list = []
-        counties = set( [(r.post_office_city,r.state,r.county) for r in res])
-        for county in counties: ## for each city, find news that contains the city name or county name or state name
-            res_json = api.get_everything(qintitle='({} OR {} OR {}) AND coronavirus'.format(county[0],county[1],county[2]), sort_by='publishedAt', \
-            language='en')
+        counties = set([(r.post_office_city, r.state, r.county) for r in res])
+        for county in counties:  # for each city, find news that contains the city name or county name or state name
+            res_json = api.get_everything(qintitle='({} OR {} OR {}) AND coronavirus'.format(county[0], county[1], county[2]), sort_by='publishedAt',
+                                          language='en')
             if res_json['totalResults'] > 0:
                 news_list.append(res_json)
-        
+
         all_news = [n['articles'] for n in news_list]
         news_list = [item for sublist in all_news for item in sublist]
-        news_list = sorted(news_list,key=lambda a:a['publishedAt'],reverse=True)
-        
+        news_list = sorted(news_list, key=lambda a: a['publishedAt'], reverse=True)
+
         # just get the titles:
         #news_list = [news['title'] for news in news_list]
         #news_list = list(set(news_list))
@@ -410,24 +328,28 @@ def get_local_news_by_zipcode(zipcode='20171'):
         #  'urlToImage': 'https://s26551.pcdn.co/wp-content/uploads/2020/03/Screen-Shot-2020-03-25-at-12.34.32-PM.jpg',
         #  'publishedAt': '2020-03-25T17:10:14Z',
         #  'content': 'Arlington and Fairfax counties are continuing to report an expected — but concerning — upward trajectory in COVID-19 cases as testing continues to ramp up.\r\nAs of noon on Wednesday, Arlington had 46 known coronavirus cases, an increase from 36 cases on Tuesda… [+2164 chars]'}
-        print("searched result: ", zipcode, news_list)
-    
+        #print("searched result: ", zipcode, news_list)
+
         return news_list
     else:
         return None
 
 
-if __name__ == "__main__":
-    # ('time_series_19-covid-Confirmed.csv')
-    """
-    df_conf = pd.read_csv(dataSource("Confirmed"))
+def show_news_list(zipcode):
+    news_list = get_local_news_by_zipcode(zipcode)
 
-    date_cols = [c for c in df_conf.columns if '/20' in c]
-    print('done reading data into dataframe')
+    ol = []
+    for news in news_list:
+        ol.append([news['title'], news['url']])
+
+    return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
+
+
+if __name__ == "__main__":
 
     df_local, date_cols = search_by_zipcode()
 
     print(df_local)
-    """
-    news_list = get_local_news_by_zipcode()
-    print(news_list)
+
+    #news_list = get_local_news_by_zipcode()
+    # print(news_list)
