@@ -29,7 +29,9 @@ search = dcc.Input(
     placeholder='Enter a zipcode...',
     type='text',
     value='21044',
-    id='search'
+    id='search',
+    style=dict(display='flex', justifyContent='center'),
+
 )
 
 output_2 = html.Div(id='output_2',
@@ -73,4 +75,13 @@ def plot_figure(zipcode):
 
 def show_news_list(zipcode):
     news_list = utl.get_local_news_by_zipcode(zipcode)
-    return html.Ol([html.Li(x) for x in news_list])
+    
+    ol = []
+    for news in news_list:
+        ol.append([news['title'], news['url']])
+        
+    # create ol list
+    html_ol_list = []
+
+    return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
+                

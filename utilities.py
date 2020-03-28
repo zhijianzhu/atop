@@ -398,8 +398,8 @@ def get_local_news_by_zipcode(zipcode='20171'):
         news_list = sorted(news_list,key=lambda a:a['publishedAt'],reverse=True)
         
         # just get the titles:
-        news_list = [news['title'] for news in news_list]
-        news_list = list(set(news_list))
+        #news_list = [news['title'] for news in news_list]
+        #news_list = list(set(news_list))
         # In [104]: news_list[0]
         # Out[104]:
         # {'source': {'id': None, 'name': 'Arlnow.com'},
