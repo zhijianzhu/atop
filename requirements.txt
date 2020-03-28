@@ -10,3 +10,4 @@ plotly
 wget
 epydemic
 newsapi-python
+uszipcode
