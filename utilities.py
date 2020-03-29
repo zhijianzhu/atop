@@ -203,7 +203,7 @@ def load_data_2():
     #countries = df_Confirmed['Country/Region'].unique()
 
     date_list = df_Confirmed.columns.to_list()
-    date_list = date_list[34:]
+    date_list = date_list[40:]
 
     region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
 

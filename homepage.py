@@ -17,6 +17,17 @@ def load_case_list(region="US"):
     data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
     return data_list_confirmed[region]
 
+def compute_increase_rate(region='US'):
+    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
+    A = data_list_confirmed[region]
+    rate = [(A[k+1] - A[k])/A[k]*100 for k in range(0,len(A)-1)]
+    return rate
+
+def load_date_list_2(region='US'):
+    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
+    return date_list[1:]
+
+
 
 body = dbc.Container(
     [
@@ -41,6 +52,21 @@ body = dbc.Container(
                             figure={"data": [
                                 {"x": load_date_list(), "y": load_case_list("US"), 'mode': "lines+markers", 'name': 'US'},
                                 {"x": load_date_list(), "y": load_case_list("Italy"), 'mode': "lines+markers", 'name': 'Italy'}
+
+                            ],
+                                "layout": utl.layout
+                            }
+                        ),
+                    ]
+                ),
+            
+               dbc.Col(
+                    [
+                        html.H2("Increas rate by date"),
+                        dcc.Graph(
+                            figure={"data": [
+                                {"x": load_date_list_2(), "y": compute_increase_rate("US"), 'mode': "lines+markers", 'name': 'US'},
+                                {"x": load_date_list_2(), "y": compute_increase_rate("Italy"), 'mode': "lines+markers", 'name': 'Italy'}
 
                             ],
                                 "layout": utl.layout
