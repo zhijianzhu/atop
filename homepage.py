@@ -51,7 +51,7 @@ body = dbc.Container(
                         dcc.Graph(
                             figure={"data": [
                                 {"x": load_date_list(), "y": load_case_list("US"), 'mode': "lines+markers", 'name': 'US'},
-                                {"x": load_date_list(), "y": load_case_list("Italy"), 'mode': "lines+markers", 'name': 'Italy'}
+                                {"x": load_date_list(), "y": load_case_list("Italy"), 'mode': "lines+markers", 'name': 'Italy'},
 
                             ],
                                 "layout": utl.layout
@@ -62,11 +62,11 @@ body = dbc.Container(
             
                dbc.Col(
                     [
-                        html.H2("Increas rate by date"),
+                        html.H2("Increase rate by date"),
                         dcc.Graph(
                             figure={"data": [
                                 {"x": load_date_list_2(), "y": compute_increase_rate("US"), 'mode': "lines+markers", 'name': 'US'},
-                                {"x": load_date_list_2(), "y": compute_increase_rate("Italy"), 'mode': "lines+markers", 'name': 'Italy'}
+                                {"x": load_date_list_2(), "y": compute_increase_rate("Italy"), 'mode': "lines+markers", 'name': 'Italy'},
 
                             ],
                                 "layout": utl.layout
