@@ -203,9 +203,10 @@ def load_data_2():
     #countries = df_Confirmed['Country/Region'].unique()
 
     date_list = df_Confirmed.columns.to_list()
-    date_list = date_list[40:]
 
     region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
+    
+    limited_date_list = date_list[35:]
 
     def update_number_by_region(df=df_Confirmed):
         data_list = {}
@@ -213,8 +214,8 @@ def load_data_2():
             #print("region is ", region)
             df_1 = df[df['Country/Region'] == region]
             df_1 = df_1.fillna(0)
-
-            confirmed_number = list(np.sum(np.array(df_1[date_list]), axis=0))
+            
+            confirmed_number = list(np.sum(np.array(df_1[limited_date_list]), axis=0))
             confirmed_number = [int(x) for x in confirmed_number]
             data_list[region] = confirmed_number
         return data_list
@@ -226,6 +227,32 @@ def load_data_2():
     # print(data_list_confirmed)
 
     return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
+
+def load_data_3(region='US'):
+
+    df_Confirmed = pd.read_csv(dataSource("Confirmed"))
+
+    date_list = df_Confirmed.columns.to_list()
+    if region == "US":
+        limited_date_list = date_list[45:]
+    else:
+        limited_date_list = date_list[36:]
+            
+    def update_number_by_region(df=df_Confirmed):
+        
+        df_1 = df[df['Country/Region'] == region]
+        df_1 = df_1.fillna(0)
+
+        confirmed_number = list(np.sum(np.array(df_1[limited_date_list]), axis=0))
+        confirmed_number = [int(x) for x in confirmed_number]
+
+        return confirmed_number
+
+    data_list_confirmed = update_number_by_region(df_Confirmed)
+
+    # print(data_list_confirmed)
+
+    return data_list_confirmed, limited_date_list 
 
 def organize_figure_structure(data):
 

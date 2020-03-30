@@ -18,13 +18,15 @@ def load_case_list(region="US"):
     return data_list_confirmed[region]
 
 def compute_increase_rate(region='US'):
-    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
-    A = data_list_confirmed[region]
+    data_list_confirmed, date_list = utl.load_data_3(region)
+    A = data_list_confirmed
+    print("confirmed data is ",A)
     rate = [(A[k+1] - A[k])/A[k]*100 for k in range(0,len(A)-1)]
     return rate
 
 def load_date_list_2(region='US'):
-    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
+    data_list_confirmed, date_list = utl.load_data_3(region)
+    print("region is ", region, " date_list is ", date_list)
     return date_list[1:]
 
 
@@ -68,11 +70,25 @@ body = dbc.Container(
             
                dbc.Col(
                     [
-                        html.H2("Increase rate by date"),
+                        html.H2("US daily increase rate"),
                         dcc.Graph(
                             figure={"data": [
-                                {"x": load_date_list_2(), "y": compute_increase_rate("US"), 'mode': "lines+markers", 'name': 'US'},
-                                {"x": load_date_list_2(), "y": compute_increase_rate("Italy"), 'mode': "lines+markers", 'name': 'Italy'},
+                                {"x": load_date_list_2("US"), "y": compute_increase_rate("US"), 'mode': "lines+markers", 'name': 'US'},
+
+                            ],
+                                "layout": utl.layout
+                            }
+                        ),
+                    ]
+                ),
+                        
+                            
+               dbc.Col(
+                    [
+                        html.H2("Italy daily increase rate"),
+                        dcc.Graph(
+                            figure={"data": [
+                                {"x": load_date_list_2("Italy"), "y": compute_increase_rate("Italy"), 'mode': "lines+markers", 'name': 'Italy'},
 
                             ],
                                 "layout": utl.layout
