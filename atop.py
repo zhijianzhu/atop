@@ -11,7 +11,7 @@ import app_3
 from homepage import Homepage
 
 
-from init import app, server  
+from init import app, server
 
 
 app.config.suppress_callback_exceptions = True
@@ -51,6 +51,7 @@ def update_graph_2(zipcode):
 def update_graph_22(zipcode):
     news_list = app_2.show_news_list(zipcode)
     return news_list
+
 
 if __name__ == '__main__':
     app.run_server(debug=False, port=5000)

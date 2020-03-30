@@ -44,8 +44,8 @@ output_2 = html.Div(id='output_2',
                     )
 
 output_22 = html.Div(id='output_22',
-                    children=[],
-                    )
+                     children=[],
+                     )
 
 body = dbc.Container(
     [
@@ -91,7 +91,6 @@ def App():
     return layout
 
 
-
 def plot_figure(zipcode):
 
     data, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
@@ -119,4 +118,3 @@ def plot_figure(zipcode):
         }
     )
     return graph
-

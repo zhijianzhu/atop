@@ -35,7 +35,7 @@ layout = {
 }
 
 
-def dataSource(category:int) -> str:
+def dataSource(category: int) -> str:
     '''
     Return the URL for the given category, which is one of the following:
     Confirmed, Deaths, Recovered
@@ -205,7 +205,7 @@ def load_data_2():
     date_list = df_Confirmed.columns.to_list()
 
     region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
-    
+
     limited_date_list = date_list[35:]
 
     def update_number_by_region(df=df_Confirmed):
@@ -214,7 +214,7 @@ def load_data_2():
             #print("region is ", region)
             df_1 = df[df['Country/Region'] == region]
             df_1 = df_1.fillna(0)
-            
+
             confirmed_number = list(np.sum(np.array(df_1[limited_date_list]), axis=0))
             confirmed_number = [int(x) for x in confirmed_number]
             data_list[region] = confirmed_number
@@ -237,9 +237,9 @@ def load_data_3(region='US'):
         limited_date_list = date_list[45:]
     else:
         limited_date_list = date_list[36:]
-            
+
     def update_number_by_region(df=df_Confirmed):
-        
+
         df_1 = df[df['Country/Region'] == region]
         df_1 = df_1.fillna(0)
 
@@ -252,7 +252,7 @@ def load_data_3(region='US'):
 
     # print(data_list_confirmed)
 
-    return data_list_confirmed, limited_date_list 
+    return data_list_confirmed, limited_date_list
 
 def organize_figure_structure(data):
 
@@ -366,15 +366,15 @@ def get_local_news_by_zipcode(zipcode='20171'):
 def show_news_list(zipcode="21029"):
     try:
         news_list = get_local_news_by_zipcode(zipcode)
-    except:
+    except BaseException:
         news_list = []
-        
+
     ol = []
     for news in news_list:
         ol.append([news['title'], news['url']])
     try:
         return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
-    except:
+    except BaseException:
         return html.Ol("API call limit")
 
 

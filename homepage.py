@@ -20,15 +20,14 @@ def load_case_list(region="US"):
 def compute_increase_rate(region='US'):
     data_list_confirmed, date_list = utl.load_data_3(region)
     A = data_list_confirmed
-    print("confirmed data is ",A)
-    rate = [(A[k+1] - A[k])/A[k]*100 for k in range(0,len(A)-1)]
+    print("confirmed data is ", A)
+    rate = [(A[k+1] - A[k])/A[k]*100 for k in range(0, len(A)-1)]
     return rate
 
 def load_date_list_2(region='US'):
     data_list_confirmed, date_list = utl.load_data_3(region)
     print("region is ", region, " date_list is ", date_list)
     return date_list[1:]
-
 
 
 body = dbc.Container(
@@ -63,12 +62,12 @@ body = dbc.Container(
                 ),
             ]
         ),
-                        
-               dbc.Row(
+
+        dbc.Row(
             [
 
-            
-               dbc.Col(
+
+                dbc.Col(
                     [
                         html.H2("US daily increase rate"),
                         dcc.Graph(
@@ -81,9 +80,9 @@ body = dbc.Container(
                         ),
                     ]
                 ),
-                        
-                            
-               dbc.Col(
+
+
+                dbc.Col(
                     [
                         html.H2("Italy daily increase rate"),
                         dcc.Graph(
@@ -97,7 +96,7 @@ body = dbc.Container(
                     ]
                 ),
             ]
-        ),                 
+        ),
 
     ],
     className="mt-4",
