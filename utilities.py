@@ -206,7 +206,7 @@ def load_data_2():
 
     region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
 
-    limited_date_list = date_list[35:]
+    date_list = date_list[35:]
 
     def update_number_by_region(df=df_Confirmed):
         data_list = {}
@@ -215,7 +215,7 @@ def load_data_2():
             df_1 = df[df['Country/Region'] == region]
             df_1 = df_1.fillna(0)
 
-            confirmed_number = list(np.sum(np.array(df_1[limited_date_list]), axis=0))
+            confirmed_number = list(np.sum(np.array(df_1[date_list]), axis=0))
             confirmed_number = [int(x) for x in confirmed_number]
             data_list[region] = confirmed_number
         return data_list
