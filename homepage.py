@@ -59,6 +59,12 @@ body = dbc.Container(
                         ),
                     ]
                 ),
+            ]
+        ),
+                        
+               dbc.Row(
+            [
+
             
                dbc.Col(
                     [
@@ -75,7 +81,7 @@ body = dbc.Container(
                     ]
                 ),
             ]
-        ),
+        ),                 
 
     ],
     className="mt-4",
