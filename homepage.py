@@ -5,6 +5,8 @@ import dash_html_components as html
 
 import utilities as utl
 
+import visdcc
+
 from navbar import Navbar
 nav = Navbar()
 
@@ -80,7 +82,11 @@ body = dbc.Container(
                         ),
                     ]
                 ),
-
+            ]
+        ),
+                        
+        dbc.Row(
+            [
 
                 dbc.Col(
                     [
@@ -97,15 +103,40 @@ body = dbc.Container(
                 ),
             ]
         ),
+                        
+        dbc.Row(
+            [
+
+                dbc.Col(
+                    [
+                        html.H2("China daily increase rate"),
+                        dcc.Graph(
+                            figure={"data": [
+                                {"x": load_date_list_2("China"), "y": compute_increase_rate("China"), 'mode': "lines+markers", 'name': 'Italy'},
+
+                            ],
+                                "layout": utl.layout
+                            }
+                        ),
+                    ]
+                ),
+            ]
+        ),
 
     ],
     className="mt-4",
 )
+                        
+footer = html.Script("""
+  <script type='text/javascript' src='https://www.counter12.com/ad.js?id=0wd8Zxd0ZW9Ddy4Y'>
+  </script>
+""")
 
 def Homepage():
     layout = html.Div([
         nav,
-        body
+        body,
+        footer
     ])
     return layout
 

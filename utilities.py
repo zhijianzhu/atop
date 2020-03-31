@@ -235,8 +235,13 @@ def load_data_3(region='US'):
     date_list = df_Confirmed.columns.to_list()
     if region == "US":
         limited_date_list = date_list[45:]
+    elif region== "Italy":
+        limited_date_list = date_list[36:]
+    elif region == "China":
+        limited_date_list = date_list[4:]
     else:
         limited_date_list = date_list[36:]
+
 
     def update_number_by_region(df=df_Confirmed):
 
