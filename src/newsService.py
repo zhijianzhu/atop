@@ -7,20 +7,10 @@ from datetime import timedelta
 
 from re import findall
 import requests
-# import plotly.express as px
+import plotly.express as px
 
 
 class dataServiceCSSE:
-    '''
-    Instance varible list:
-    today
-    categories
-    region_of_interest
-    dataSet
-    all_date_range
-    date_list
-
-    '''
 
     def __init__(self):
 
@@ -114,56 +104,28 @@ class dataServiceCSSE:
 
         return ret
 
-class dataServiceCSBS(object):
-    '''
-    Instance varible list:
-    today
-    categories
-    region_of_interest
-    dataSet
-    all_date_range
-    date_list
 
-    '''
-
-    __instance = None 
-    today = None 
-
-    def __new__(cls, *agrs, **kwargs):
-
-        if not cls.__instance:
-            print('__new__ not _instance ')
-            cls.__instance = object.__new__(cls, *agrs, **kwargs)
-            cls.__instance.__init__()
-
-        return cls.__instance 
-
+class dataServiceCSBS:
 
     def __init__(self):
 
-        if self.today == date.today():
-            return 
-
-        print('__init__')
         self.today = date.today()  # check wether date changed
         self.categories = ['Confirmed', 'Deaths']
         self.all_date_range = []
         self.df_columns = ['County_Name', 'State_Name',
                            'Confirmed', 'New',
-                           'Deaths', 'Fatality_Rate',
+                           'Death', 'Fatality_Rate',
                            'Latitude', 'Longitude',
                            'Last_Update']
         self.init_datasSet()
-        dataServiceCSBS.__instance = self 
 
     def regions(self):
         return self.region_of_interest
 
     def init_regions(self, Confirmed):
         #
-        sample_date = self.all_date_range[-1]
-        s = Confirmed[['State_Name', sample_date ]].groupby(['State_Name'])\
-            .sum().sort_values(sample_date, ascending=False)
+        s = Confirmed[['State_Name', '2020-03-24']].groupby(['State_Name'])\
+            .sum().sort_values('2020-03-24', ascending=False)
         self.region_of_interest = s.index.tolist()  # [0:17]
 
     def read_csv(self, fn):
@@ -201,11 +163,10 @@ class dataServiceCSBS(object):
 
         self.all_date_range = []
         Confirmed = self.read_csv(csvs[0])
-        Confirmed[['Latitude', 'Longitude']] = Confirmed[['Latitude', 'Longitude']] .astype(float)
 
         #Confirmed.set_index(['County_Name','State_Name'], inplace=True)
 
-        Deaths = Confirmed.copy()
+        Death = Confirmed.copy()
 
         for csv in csvs:
 
@@ -222,27 +183,24 @@ class dataServiceCSBS(object):
 
             d = data[['County_Name', 'State_Name', 'Death']]
             d.columns = c.columns
-            Deaths = pd.merge(Deaths, d, how='left',
+            Death = pd.merge(Death, d, how='left',
                              on=['County_Name', 'State_Name'])
 
             self.all_date_range.append(date)
 
         self.dataSet = {}
         self.dataSet[self.categories[0]] = Confirmed
-        self.dataSet[self.categories[1]] = Deaths
+        self.dataSet[self.categories[1]] = Death
 
         self.latest_date = self.all_date_range[-1]
-        self.date_list = self.all_date_range
 
         self.init_regions(Confirmed)
-
 
     def date_range(self, date_window_option='ALL'):
         # ALL, MONS, MON, WEEKS, WEEK
         # format- m/d/yy
 
         if date_window_option == 'ALL':
-            self.date_list = self.all_date_range
             return self.all_date_range
 
         dtDelta = {'MONS': 60, 'MON': 30, 'WEEKS': 14, 'WEEK': 7}
@@ -254,13 +212,11 @@ class dataServiceCSBS(object):
             if ymd in self.all_date_range:
                 ret.append(ymd)
 
-        self.date_list = ret 
-        
         return ret
 
     def refresh_category(self, category: str, date_window_option, region_of_interest):
         # refresh data as per :category, date list and region of interest
-        df = self.dataSet[category].copy()
+        df = self.dataSet[category]
 
         self.date_list = self.date_range(date_window_option)
 
@@ -283,11 +239,71 @@ class dataServiceCSBS(object):
 
         return '{}~{}'.format(self.date_list[0], self.date_list[-1])
 
+    def geo_layout(self, title, projection='natural earth'):  # Confirmed Total
+        layout = dict(title='CoronaVirus {} as of {}'.format(title, str(date.today())),
+                      height=700,
+                      colorbar=True,
+                      geo=dict(
+            # scope='usa',
+            projection=projection,  # dict( type='albers usa' ),
+            showland=True,
+            landcolor="rgb(250, 250, 250)",
+            subunitcolor="rgb(217, 217, 217)",
+            countrycolor="rgb(217, 217, 217)",
+            countrywidth=0.5,
+            subunitwidth=0.5
+        ),
+        )
+        return layout
+
+    def geo_data(self, category):
+
+        df = self.dataSet[category].fillna(0)
+        df.drop(columns=['County_Name', 'Confirmed', 'New', 'Death',
+                         'Fatality_Rate', 'Last_Update', ], inplace=True)
+
+        total = df.groupby('State_Name').sum()
+        avg = df.groupby('State_Name').mean()
+
+        total.reset_index(level=0, inplace=True)
+
+        total['text'] = total.apply(lambda x: '{}\n{}'.format(x['State_Name'], x[self.latest_date]), axis=1)
+
+        data = [dict(
+            type='scattergeo',
+            # locationmode =  #'USA-states',
+                locations="iso_alpha",
+                lon=avg['Longitude'],
+                lat=avg['Latitude'],
+                text=total['text'],
+                mode='markers',
+                marker=dict(
+                    size=8,
+                    opacity=0.8,
+                    reversescale=True,
+                    autocolorscale=False,
+                    symbol='circle',
+                    line=dict(
+                        width=1,
+                        color='rgba(102, 102, 102)'
+                    ),
+                    # colorscale = scl,
+                    color_continuous_scale=px.colors.diverging.BrBG,
+                    color_continuous_midpoint=avg[self.latest_date],
+                    cmin=0,
+                    color=total[self.latest_date],
+                    cmax=total[self.latest_date].max(),
+                    colorbar=dict(
+                        title=' {} Total'.format(category)
+                    )
+                ))]
+
+        return data
 
 #ds = dataServiceCSSE()
 
 
-#ds = dataServiceCSBS()
+ds = dataServiceCSBS()
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #     print(ds.columns)

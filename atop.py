@@ -4,9 +4,9 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 # layout
-import app_1
-import app_2
-import app_3
+import page_by_region
+import page_search
+import page_model
 
 from homepage import Homepage
 
@@ -25,32 +25,27 @@ app.layout = html.Div([
               [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/by_region':
-        return app_1.App()
+        return page_by_region.App()
     elif pathname == "/search":
-        return app_2.App()
+        return page_search.App()
     elif pathname == "/model":
-        return app_3.load_layout()
+        return page_model.load_layout()
     else:
         return Homepage()
 
-@app.callback(Output('output_1', 'children'),
-              [Input('pop_dropdown', 'value')])
-def update_graph_1(city):
-    figure_1 = app_1.plot_figure(city)
-    return figure_1
 
-@app.callback(Output('output_2', 'children'),
-              [Input('search', 'value')])
-def update_graph_2(zipcode):
-    figure_2 = app_2.plot_figure(zipcode)
-    return figure_2
+# @app.callback(Output('output_2', 'children'),
+#               [Input('search', 'value')])
+# def update_graph_zipcode(zipcode):
+#     figure_2 = page_search.plot_figure(zipcode)
+#     return figure_2
 
 
-@app.callback(Output('output_22', 'children'),
-              [Input('search', 'value')])
-def update_graph_22(zipcode):
-    news_list = app_2.show_news_list(zipcode)
-    return news_list
+# @app.callback(Output('output_22', 'children'),
+#               [Input('search', 'value')])
+# def update_graph_zipcode2(zipcode):
+#     news_list = page_search.show_news_list(zipcode)
+#     return news_list
 
 
 if __name__ == '__main__':
