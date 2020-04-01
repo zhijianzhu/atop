@@ -1,4 +1,9 @@
 import math 
+        
+from uszipcode import SearchEngine
+from uszipcode import model
+        
+
 from src.dataService  import dataServiceCSBS as CSBS 
 
 class geoClass:
@@ -67,7 +72,7 @@ class geoClass:
 
 
     def zipcodeInfo(self, zipcode='22030'):
-        from uszipcode import SearchEngine
+
         search = SearchEngine()
 
         zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
@@ -76,10 +81,12 @@ class geoClass:
 
 
     def get_regions(self, zipcode = '22030',radius = 100):
-        from uszipcode import SearchEngine
-        from uszipcode import model
-        
+        search = SearchEngine()
+
+        zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
+
         if zipcode_info.zipcode is not None:
+
             lat, lng = zipcode_info.lat, zipcode_info.lng
             
             res = search.query(

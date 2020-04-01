@@ -10,6 +10,8 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input
 
 from src.geoService  import geoClass 
+from src.newsService import newsClass 
+
 from init import app
 import utilities as utl
 
@@ -24,7 +26,7 @@ raw_symbols = SymbolValidator().values
 # navigation bar
 nav = Navbar()
 geoSvr  = geoClass() 
-
+newsSvr = newsClass()
 
 header = html.H3(
     'Choose a zipcode and find nearby status.'
@@ -82,7 +84,7 @@ def update_map_and_news( zipcode, radius):
 
     return plot_figure('Confirmed',zipcode, radius), \
            plot_figure('Deaths',zipcode, radius), \
-           utl.show_news_list(zipcode)
+           newsSvr.show_news_list(zipcode)
 
 
 def plot_figure(category, zipcode, radius):
