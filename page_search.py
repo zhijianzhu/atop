@@ -28,6 +28,8 @@ nav = Navbar()
 geoSvr  = geoClass() 
 newsSvr = newsClass()
 
+
+
 header = html.H3(
     'Choose a zipcode and find nearby status.'
 )
@@ -81,10 +83,10 @@ def App():
     [Input(component_id='zipcodeInput', component_property='value'),
      Input('radiusInput', 'value')])
 def update_map_and_news( zipcode, radius):
-
+    # print('---------- type(newsSvr):{} ----------------'.format(type(newsSvr) ) )
     return plot_figure('Confirmed',zipcode, radius), \
            plot_figure('Deaths',zipcode, radius), \
-           newsSvr.show_news_list(zipcode)
+           newsSvr.show_news_list(zipcode, radius)
 
 
 def plot_figure(category, zipcode, radius):
@@ -111,3 +113,7 @@ def plot_figure(category, zipcode, radius):
             figure=fig ,
             )
     return graph
+
+
+print('.... Page_search loaded, id(geoSvr):{}, id(newsSvr):{}'.format( 
+    id(geoSvr), id(newsSvr)))

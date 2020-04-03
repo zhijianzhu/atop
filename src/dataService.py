@@ -132,9 +132,9 @@ class dataServiceCSBS(object):
     def __new__(cls, *agrs, **kwargs):
 
         if not cls.__instance:
-            print('__new__ not _instance ')
             cls.__instance = object.__new__(cls, *agrs, **kwargs)
             cls.__instance.__init__()
+            print('.... dataServiceCSBS Created, id:{}'.format( id(cls.__instance) ))
 
         return cls.__instance 
 
@@ -144,7 +144,6 @@ class dataServiceCSBS(object):
         if self.today == date.today():
             return 
 
-        print('__init__')
         self.today = date.today()  # check wether date changed
         self.categories = ['Confirmed', 'Deaths']
         self.all_date_range = []
@@ -154,7 +153,7 @@ class dataServiceCSBS(object):
                            'Latitude', 'Longitude',
                            'Last_Update']
         self.init_datasSet()
-        dataServiceCSBS.__instance = self 
+        print('.... dataServiceCSBS Initialized, id:{}'.format(id(self.__instance) ))
 
     def regions(self):
         return self.region_of_interest

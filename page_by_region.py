@@ -120,3 +120,7 @@ def plot_figure( df , category , dt_range):
         }
     )
     return graph
+
+
+
+print('.... Page_by_region  loaded, id(ds):{}'.format( id(ds) )) 

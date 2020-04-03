@@ -4,7 +4,7 @@ from uszipcode import SearchEngine
 from uszipcode import model
         
 
-from src.dataService  import dataServiceCSBS as CSBS 
+from  src.dataService  import dataServiceCSBS as CSBS 
 
 class geoClass:
 
@@ -26,10 +26,32 @@ class geoClass:
         def __str__(self):
             return '{} <--> {}, {} ^ {}'.format(self.left, self.right, self.bottom,self.top)
 
+    __instance = None 
+
+
+    # def __new__(cls, *agrs, **kwargs):
+
+    #     if not cls.__instance:
+    #         cls.__instance = object.__new__(cls, *agrs, **kwargs)
+    #         cls.__instance.__init__()
+    #         print('.... dataServiceCSBS Created, id:{}'.format( id(cls.__instance) ))
+
+    #     return cls.__instance 
+
+
+    def __new__(cls):
+
+        if not cls.__instance :
+            cls.__instance = object.__new__(cls)
+            cls.__instance.__init__() 
+            print('.... geoClass Created, id:{}'.format( id(cls.__instance) ))
+ 
+        return cls.__instance
+        
 
     def __init__(self ):
-
         self.ds = CSBS()
+        print('.... geoClass Initialized, id(self.ds):{}'.format( id( self.ds) ))
 
     def geo_layout(self, title, projection='natural earth'):  # Confirmed Total
         layout = dict(title='CoronaVirus {} as of {}'.format(title, str(date.today())),
@@ -80,11 +102,14 @@ class geoClass:
         return self.point(zipcode_info.lng ,zipcode_info.lat )
 
 
-    def get_regions(self, zipcode = '22030',radius = 100):
+    def get_regions(self, zipcode = '22030', radius = 100):
+
+        pritn('>>>>>>get_regions ( {},{}) <<<<<<'.format(zipcode, radius))
+
         search = SearchEngine()
 
         zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
-
+        pritn('>>>>>>get_regions:{}'.format(zipcode_info))
         if zipcode_info.zipcode is not None:
 
             lat, lng = zipcode_info.lat, zipcode_info.lng

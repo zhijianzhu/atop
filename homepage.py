@@ -28,7 +28,9 @@ def compute_increase_rate(region='US'):
 
 def load_date_list_2(region='US'):
     data_list_confirmed, date_list = utl.load_data_3(region)
-    print("region is ", region, " date_list is ", date_list)
+    
+    print("region is {}, date from {} ~ {}".format(region, date_list[0], date_list[-1]))
+
     return date_list[1:]
 
 
