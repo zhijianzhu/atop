@@ -1,5 +1,6 @@
 flask_basicauth
 pandas
+numpy
 flask-bootstrap
 dash
 dash-renderer
@@ -11,3 +12,6 @@ wget
 epydemic
 newsapi-python
 uszipcode
+google-api-python-client
+dateparser
+visdcc
