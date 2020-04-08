@@ -28,12 +28,12 @@ class dataServiceCSSE:
         self.categories = ['Confirmed', 'Deaths', 'Recovered']
         self.region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain', 'China', 'Japan', 'Singapore', 'Australia'
                                    ]
-        self.init_datasSet()
+        self.init_dataSet()
 
     def regions(self):
         return self.region_of_interest
 
-    def init_datasSet(self):
+    def init_dataSet(self):
         # Fetch data
         self.dataSet = {}
         for category in self.categories:
@@ -127,7 +127,7 @@ class dataServiceCSBS(object):
     '''
 
     __instance = None 
-    today = None 
+    __today = None 
 
     def __new__(cls, *agrs, **kwargs):
 
@@ -136,15 +136,18 @@ class dataServiceCSBS(object):
             cls.__instance.__init__()
             print('.... dataServiceCSBS Created, id:{}'.format( id(cls.__instance) ))
 
+        # check wether date changed, to determine init_dataSet 
+        if cls.__today != date.today():
+            cls.__today = date.today()
+            cls.__instance.init_dataSet()
+            print('.... dataServiceCSBS init DataSet for {}'.format( cls.__today ))
+
         return cls.__instance 
 
 
     def __init__(self):
 
-        if self.today == date.today():
-            return 
-
-        self.today = date.today()  # check wether date changed
+        # self.__today = date.today()  
         self.categories = ['Confirmed', 'Deaths']
         self.all_date_range = []
         self.df_columns = ['County_Name', 'State_Name',
@@ -152,8 +155,7 @@ class dataServiceCSBS(object):
                            'Deaths', 'Fatality_Rate',
                            'Latitude', 'Longitude',
                            'Last_Update']
-        self.init_datasSet()
-        print('.... dataServiceCSBS Initialized, id:{}'.format(id(self.__instance) ))
+        self.init_dataSet()
 
     def regions(self):
         return self.region_of_interest
@@ -189,8 +191,11 @@ class dataServiceCSBS(object):
 
         return Confirmed
 
+    def refresh_dataSet(self):
+        if self.__today != date.today():
+            self.init_dataSet()
 
-    def init_datasSet(self):
+    def init_dataSet(self):
 
         git_master_url = "https://github.com/tomquisel/covid19-data/tree/master/"
 
@@ -239,6 +244,7 @@ class dataServiceCSBS(object):
     def date_range(self, date_window_option='ALL'):
         # ALL, MONS, MON, WEEKS, WEEK
         # format- m/d/yy
+        self.refresh_dataSet()
 
         if date_window_option == 'ALL':
             self.date_list = self.all_date_range
@@ -259,6 +265,8 @@ class dataServiceCSBS(object):
 
     def refresh_category(self, category: str, date_window_option, region_of_interest):
         # refresh data as per :category, date list and region of interest
+        self.refresh_dataSet()
+        
         df = self.dataSet[category].copy()
 
         self.date_list = self.date_range(date_window_option)

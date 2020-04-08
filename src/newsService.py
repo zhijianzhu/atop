@@ -1,4 +1,7 @@
 from newsapi import NewsApiClient
+from googleapiclient.discovery import build
+import dateparser 
+
 from uszipcode import SearchEngine
 from uszipcode import model
 from datetime import date
@@ -6,34 +9,37 @@ from datetime import date
 import dash_html_components as html
 import pickle 
 import os 
+import sys, traceback 
 
 from src.geoService import geoClass 
-
 geo = geoClass()
 
-class NewsAPI:
-
-    def __init__(self, api_key='dc70f60f4aab4cfcaeffba24b1ded39d'):
-        self.api_key = api_key
-        self.api = NewsApiClient(self.api_key)
+class News:
+    def __init__(self, folder ):
         self.today = date.today()
-        self.newsLocalFolder = './data/FromNewsApiClient'
+        self.newsLocalFolder = folder 
+        if not os.path.exists( folder):
+            os.mkdir(folder)
+            print('News.__init__ mkdir {}'.format(folder) )
 
-        if not os.path.exists( self.newsLocalFolder):
-            os.mkdir(self.newsLocalFolder)
+        folder = os.path.join(folder, '{}'.format(self.today))
+        if not os.path.exists( folder ):
+            os.mkdir(folder)
+            print('News.__init__ mkdir {}'.format(folder) )
+
+        print('In side News: self.newsLocalFolder={}'.format(self.newsLocalFolder))
 
     def saveNewsLocal(self, county, res_json):
-        # print('SaveNewsLocal, res_json:{}'.format(res_json))
-        fn = os.path.join(self.newsLocalFolder, '{}-{}'.format(county[2], self.today) )
+
+        fn = os.path.join(self.newsLocalFolder, '{}'.format(self.today), county[-1])
 
         with open(fn, 'wb') as f:
             pickle.dump( res_json, f )
 
-        # print('>>>>>>>>>>>>>>>>>>>>Saved to file:{}'.format(fn))
-
     def readNewsLocal(self, county):
+
         # print('Read from local for county:{}'.format(county))
-        fn = os.path.join(self.newsLocalFolder, '{}-{}'.format(county[2], self.today))
+        fn = os.path.join(self.newsLocalFolder, '{}'.format(self.today), county[-1])
         if not os.path.exists(fn):
             return None 
 
@@ -44,14 +50,12 @@ class NewsAPI:
 
         return ret 
 
+
+
     def filter_news ( self, news_list):
         # removing duplicated titles, only remain the latest one
         if not news_list:
             return None 
-
-        all_news = [n['res_json']['articles'] for n in news_list]
-
-        news_list = [item for sublist in all_news for item in sublist]
 
         news_list = sorted(news_list,key=lambda a:a['publishedAt'] + a['title'] ,reverse=True)
 
@@ -63,15 +67,25 @@ class NewsAPI:
 
         return [ v  for k, v  in ret.items()]
 
+
+class NewsAPI(News):
+
+    def __init__(self,  api_key='dc70f60f4aab4cfcaeffba24b1ded39d' ):
+        self.api_key = api_key
+        self.api = NewsApiClient(self.api_key)
+
+        super().__init__('./data/FromNewsApiClient' )
+
+
     def get_news_from_newsapi(self, counties):    
 
         news_list = []
         for county in counties: ## for each city, find news that contains the city name or county name or state name
 
-            print('>>>>>>> get_news_from_newsapi, county:{}'.format( county ))
+            # print('>>>>>>>>>>> get_news_from_newsapi, county:{}<<<<<<'.format( county[-1] ))
             res_json = self.readNewsLocal(county)
 
-            print('>>>>>>> read from local :{}'.format( res_json ))
+            # print('>>>>>>>> read from local : return length:{}'.format( len(res_json) ))
             if res_json :
                 news_list.append({'res_json':res_json, 'county':county })
 
@@ -87,14 +101,22 @@ class NewsAPI:
                 news_list.append({'res_json':res_json,'county':county})
                 self.saveNewsLocal(county, res_json)
 
+        if len(news_list)>0:
+
+            all_news = [n['res_json']['articles'] for n in news_list]
+            news_list = [item for sublist in all_news for item in sublist]
 
         return self.filter_news(news_list) # remove duplications
 
 
-class Gcse:
-    def __init__(self,api_key='AIzaSyD6-1mSmVCL-SIuUpKWISPJfh5dmeHWZjc', cse_id='005840374175465383351:57bjmicu65t'):
+class Gcse(News):
+
+    def __init__(self,  api_key='AIzaSyD6-1mSmVCL-SIuUpKWISPJfh5dmeHWZjc', cse_id='005840374175465383351:57bjmicu65t'):
         self.api_key = api_key
         self.cse_id = cse_id
+
+        super().__init__('./data/FromGoogleNews' )
+
      
     def google_search(self, search_term, **kwargs):
         api_key = self.api_key
@@ -105,21 +127,43 @@ class Gcse:
     
     def news_for_counties(self, counties):
         news_list = []
+
         for county in counties:
+            res_json = self.readNewsLocal(county)
+
+            if res_json :
+                news_list.append({'res_json':res_json, 'county':county })
+
+                continue             
+
+
             res_json = self.google_search(search_term='({} {} {}) coronavirus'.format(county[0],county[1],county[2]), sort='date')
+
             if len(res_json['items']) > 0:
+                self.saveNewsLocal(county, res_json)
                 news_list.append({'res_json':res_json['items'],'county':county})
+
         if len(news_list)>0:
-            all_news = [n['res_json'] for n in news_list]
-            news_list = [item for sublist in all_news for item in sublist]
-            # news_list = sorted(news_list,key=lambda a:a['publishedAt'],reverse=True)
-            news_list = sorted(news_list,key=lambda a:dateparser.parse(a['snippet'].split('...')[0].strip()),reverse=True)
-            return news_list
+
+            all_items = [n['res_json']['items'] for n in news_list]
+
+            all_titles = [item for sublist in all_items for item in sublist]
+
+            news_list = [ {'title': item['title'],
+                             'url':item['link'],
+                             'publishedAt': '{}'.format(dateparser.parse(item['snippet'].split('...')[0].strip() )) }  
+                          for item in all_titles ]
+
+
+            return self.filter_news(news_list)
         else:
             return None
 
 
 class newsClass:
+
+    def __init__(self):
+        pass 
 
     def test_gcse_news_search(self):     
         gcse_obj = Gcse()
@@ -129,10 +173,9 @@ class newsClass:
 
 
     def get_local_news_by_zipcode(self, zipcode, radius ):    
-        print('>>>>>>>>>>>>>get_local_news_by_zipcode:{}, radius:{}, id(geo):{}'.format( zipcode, radius, id(geo)))
 
         counties = geo.get_regions(zipcode, radius)
-        print('>>>>>>>>>>>>>get_local_news_by_zipcode:{}, radius:{}, counties:{}'.format( zipcode, radius, counties))
+
         if counties is not None:
             try:
                 newsAPI = NewsAPI()
@@ -140,6 +183,8 @@ class newsClass:
 
             except Exception as ex :
                 news_list = None
+                print('>>> No news fetched from newsAPI....')
+
 
             if news_list is not None:
                 return news_list
@@ -149,6 +194,7 @@ class newsClass:
 
                 news_list = gcse_obj.news_for_counties(counties)
                 if news_list is not None:
+                    print( '>>> news_list from gcse.news_for_counties...')
                     return news_list
                 else:
                     return None
@@ -158,11 +204,14 @@ class newsClass:
 
 
     def show_news_list(self, zipcode="21029", radius=70 ):
-        print(' ======== show news list ===========')
         try:
             news_list = self.get_local_news_by_zipcode(zipcode, radius )
-        except BaseException:
+        except BaseException as ex :
+            print('-'*60)
+            traceback.print_exc( file=sys.stdout)
+            print('-'*60)
             news_list = []
+
 
         ol = []
         for news in news_list:
@@ -227,6 +276,6 @@ class newsClass:
 
 
 if __name__ == '__main__':
-    newsSrv = newsClass()
-    news = newsSrv.show_news_list()
+    newsSvr = newsClass()
+    news = newsSvr.show_news_list()
     print('Don!')

@@ -1,5 +1,6 @@
 import math 
-        
+import numpy as np 
+
 from uszipcode import SearchEngine
 from uszipcode import model
         
@@ -9,13 +10,15 @@ from  src.dataService  import dataServiceCSBS as CSBS
 class geoClass:
 
     class point:
-        def __init__(self, longitude, latitude):
-            self.x = longitude 
-            self.y = latitude 
+        def __init__(self, lng , lat ):
+            self.lng = lng
+            self.lat = lat 
 
         def dict(self):
-            d = { 'lon':self.x, 'lat':self.y }
+            d = { 'lon':self.lng, 'lat':self.lat }
             return d 
+        def __str__(self):
+            return 'lat:{}, lng:{}'.format(self.lat, self.lng)
 
     class rect:
         def __init__(self, x0, x1, y0, y1):
@@ -28,17 +31,6 @@ class geoClass:
 
     __instance = None 
 
-
-    # def __new__(cls, *agrs, **kwargs):
-
-    #     if not cls.__instance:
-    #         cls.__instance = object.__new__(cls, *agrs, **kwargs)
-    #         cls.__instance.__init__()
-    #         print('.... dataServiceCSBS Created, id:{}'.format( id(cls.__instance) ))
-
-    #     return cls.__instance 
-
-
     def __new__(cls):
 
         if not cls.__instance :
@@ -50,6 +42,13 @@ class geoClass:
         
 
     def __init__(self ):
+
+        search = SearchEngine()
+
+        self.defaultZipcodeInfo = search.by_zipcode('21029')
+
+        self.defaultRadius = 70
+
         self.ds = CSBS()
         print('.... geoClass Initialized, id(self.ds):{}'.format( id( self.ds) ))
 
@@ -87,45 +86,39 @@ class geoClass:
 
     def rectByZipAndEdge(self, center, edge):
         # return the rect of lat/lon range 
-        lat, lon = center.y, center.x   
+        lat, lng = center.lat, center.lng   
         radius = 3959 # mile 
         delta = float(edge) * 180 / radius / math.pi 
-        return self.rect(lon - delta, lon + delta , lat - delta, lat + delta) 
+        return self.rect(lng - delta, lng + delta , lat - delta, lat + delta) 
 
 
-    def zipcodeInfo(self, zipcode='22030'):
+    def zipcodeInfo(self, zipcode):
 
         search = SearchEngine()
 
         zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
+        if not zipcode_info.zipcode:
+            zipcode_info = self.defaultZipcodeInfo
 
-        return self.point(zipcode_info.lng ,zipcode_info.lat )
+        return self.point(lng = zipcode_info.lng, lat = zipcode_info.lat )
 
 
     def get_regions(self, zipcode = '22030', radius = 100):
 
-        pritn('>>>>>>get_regions ( {},{}) <<<<<<'.format(zipcode, radius))
+        zipcode_info = self.zipcodeInfo( zipcode ) 
 
-        search = SearchEngine()
+        res = SearchEngine().query(
+            lat = zipcode_info.lat,
+            lng = zipcode_info.lng,
+            radius = radius,
+            sort_by = model.SimpleZipcode.population, #model.Zipcode.median_household_income,
+            ascending = False,
+            returns = 12,
+            )  # get 12 biggest cities around 100 miles around the given zip code
 
-        zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
-        pritn('>>>>>>get_regions:{}'.format(zipcode_info))
-        if zipcode_info.zipcode is not None:
+        counties = set( [(r.post_office_city,r.state,r.county) for r in res])
 
-            lat, lng = zipcode_info.lat, zipcode_info.lng
-            
-            res = search.query(
-                lat=lat,
-                lng=lng,
-                radius=radius,
-                sort_by= model.SimpleZipcode.population, #model.Zipcode.median_household_income,
-                ascending=False,
-                returns=10,
-            ) # get 20 biggest cities around 100 miles around the given zip code
-            counties = set( [(r.post_office_city,r.state,r.county) for r in res])
-            return counties 
-        else:
-            return None
+        return counties 
 
 
     def calc_zoom(self, rect):
@@ -154,6 +147,7 @@ class geoClass:
         df = df[['County_Name','Latitude', 'Longitude', self.ds.latest_date ]].fillna(0)
         df = df.rename(columns = {self.ds.latest_date:category})
 
+        df['size'] = df.apply( lambda r: np.log10(r[category] + 1 ) , axis = 1 )
        
         df = df[ df['Longitude'] <= self.rectArea.right ]
         df = df[ df['Longitude'] >= self.rectArea.left ]
@@ -179,31 +173,46 @@ class geoClass:
 
         return df_local, date_cols
 
-    def fetch_lat_long_by_name(self):
-        from geopy.geocoders import Nominatim
-        import pandas as pd
+    # def fetch_lat_long_by_name(self):
+    #     from geopy.geocoders import Nominatim
+    #     import pandas as pd
 
-        df_conf = pd.read_csv('../data/time_series_19-covid-Confirmed.csv')
-        df_us = df_conf[df_conf['Country/Region'] == 'US']
-        location_names = df_us['Province/State'].values.tolist()
-        geolocator = Nominatim(user_agent="corona")
-        unqueried = location_names
-        list_dict = []
-        while len(unqueried) > 0:
-            for l in location_names:
-                try:
-                    if ',' not in l:
-                        location = geolocator.geocode(l + ' State')
-                    else:
-                        location = geolocator.geocode(l)
-                    unqueried.remove(l)
-                    list_dict.append({'Province/State': l, 'Lat': location.latitude, 'Long': location.longitude})
-                except BaseException:
-                    print('time out for querying %s' % l)
+    #     df_conf = pd.read_csv('../data/time_series_19-covid-Confirmed.csv')
+    #     df_us = df_conf[df_conf['Country/Region'] == 'US']
+    #     location_names = df_us['Province/State'].values.tolist()
+    #     geolocator = Nominatim(user_agent="corona")
+    #     unqueried = location_names
+    #     list_dict = []
+    #     while len(unqueried) > 0:
+    #         for l in location_names:
+    #             try:
+    #                 if ',' not in l:
+    #                     location = geolocator.geocode(l + ' State')
+    #                 else:
+    #                     location = geolocator.geocode(l)
+    #                 unqueried.remove(l)
+    #                 list_dict.append({'Province/State': l, 'Lat': location.latitude, 'Long': location.longitude})
+    #             except BaseException:
+    #                 print('time out for querying %s' % l)
 
-        latlong_df = pd.DataFrame.from_records(list_dict)
-        latlong_df.to_csv('../data/lat_long_by_loc_name.csv')
+    #     latlong_df = pd.DataFrame.from_records(list_dict)
+    #     latlong_df.to_csv('../data/lat_long_by_loc_name.csv')
 
-# if __name__ == '__main__':
-#     geo = geoClass()
+if __name__ == '__main__':
+    geo = geoClass()
+
+    zipcode = '21029'
+    radius = '100'
+
+
+    center = geo.zipcodeInfo(zipcode)
+    rectArea = geo.rectByZipAndEdge( center, radius)
+    zoom = geo.calc_zoom(rectArea)
+
+
+
+    print('center: {}'.format( center  ) )
+    print('rectArea: {}'.format( rectArea) )
+    print('zoom: {}'.format( zoom) )
+
 
