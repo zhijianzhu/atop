@@ -5,6 +5,7 @@ import dateparser
 from uszipcode import SearchEngine
 from uszipcode import model
 from datetime import date
+# from datetime import datetime 
 
 import dash_html_components as html
 import pickle 
@@ -101,10 +102,19 @@ class NewsAPI(News):
                 news_list.append({'res_json':res_json,'county':county})
                 self.saveNewsLocal(county, res_json)
 
-        if len(news_list)>0:
+        if len(news_list) == 0:
+            print('No News fetched via NewsAPI...')
+            return None 
 
-            all_news = [n['res_json']['articles'] for n in news_list]
-            news_list = [item for sublist in all_news for item in sublist]
+        all_news = [n['res_json']['articles'] for n in news_list]
+
+        all_titles = [item for sublist in all_news for item in sublist]
+
+        news_list = [ {'title': item['title'],
+                         'url':item['link'],
+                         'publishedAt': dateparser(item['publishedAt']).strftime('%Y-%m-%d %H:%M:%S') }  
+                      for item in all_titles ]
+
 
         return self.filter_news(news_list) # remove duplications
 
@@ -140,24 +150,24 @@ class Gcse(News):
             res_json = self.google_search(search_term='({} {} {}) coronavirus'.format(county[0],county[1],county[2]), sort='date')
 
             if len(res_json['items']) > 0:
-                self.saveNewsLocal(county, res_json)
+                self.saveNewsLocal(county, res_json['items'])
                 news_list.append({'res_json':res_json['items'],'county':county})
 
-        if len(news_list)>0:
+        if len(news_list)==0:
+            print('No News fetched via GCSE...')
+            return None 
 
-            all_items = [n['res_json']['items'] for n in news_list]
+        all_items = [n['res_json'] for n in news_list]
 
-            all_titles = [item for sublist in all_items for item in sublist]
+        all_titles = [item for sublist in all_items for item in sublist]
 
-            news_list = [ {'title': item['title'],
-                             'url':item['link'],
-                             'publishedAt': '{}'.format(dateparser.parse(item['snippet'].split('...')[0].strip() )) }  
-                          for item in all_titles ]
+        news_list = [ {'title': item['title'],
+                         'url':item['link'],
+                         'publishedAt': dateparser.parse(item['snippet'].split('...')[0].strip() ).strftime('%Y-%m-%d %H:%M:%S') }  
+                      for item in all_titles ]
 
 
-            return self.filter_news(news_list)
-        else:
-            return None
+        return self.filter_news(news_list)
 
 
 class newsClass:
@@ -172,35 +182,33 @@ class newsClass:
 
 
 
-    def get_local_news_by_zipcode(self, zipcode, radius ):    
+    def get_local_news_by_zipcode(self, zipcode="21029", radius=70  ):    
 
         counties = geo.get_regions(zipcode, radius)
 
-        if counties is not None:
-            try:
-                newsAPI = NewsAPI()
-                news_list = newsAPI.get_news_from_newsapi(counties)
+        if counties is  None:
+            return None 
 
-            except Exception as ex :
-                news_list = None
-                print('>>> No news fetched from newsAPI....')
+        try:
+            newsAPI = NewsAPI()
+            news_list = newsAPI.get_news_from_newsapi(counties)
+
+        except Exception as ex :
+            news_list = None
+            print('>>> No news fetched from newsAPI....')
 
 
-            if news_list is not None:
-                return news_list
-            else:  
+        if news_list is not None:
+            return news_list
 
-                gcse_obj = Gcse()
+        gcse_obj = Gcse()
 
-                news_list = gcse_obj.news_for_counties(counties)
-                if news_list is not None:
-                    print( '>>> news_list from gcse.news_for_counties...')
-                    return news_list
-                else:
-                    return None
+        news_list = gcse_obj.news_for_counties(counties)
+        if news_list is not None:
+            print( '>>> news_list from gcse.news_for_counties...')
+            return news_list
         else:
             return None
-
 
 
     def show_news_list(self, zipcode="21029", radius=70 ):
@@ -213,16 +221,18 @@ class newsClass:
             news_list = []
 
 
-        ol = []
-        for news in news_list:
-            ol.append([news['title'], news['url']])
-
-        # for x in ol:
-        #     print(x[0] )
-
         try:
-            return html.Ol([html.Li(html.A(x[0], href=x[1])) for x in ol])
+            return html.Ol([ 
+                        html.Li([ 
+                            html.A(x['title'], href=x['url'], target ='_blank' ),
+                            html.div(x['publishedAt'], style={'size':1,'color':"blue"}) 
+                                ])
+                        for x in news_list])
+
         except BaseException:
+            print('-'*60)
+            traceback.print_exc( file=sys.stdout)
+            print('-'*60)
             return html.Ol("API call limit")
 
 # def get_local_news_by_zipcode(zipcode='20171'):
@@ -278,4 +288,9 @@ class newsClass:
 if __name__ == '__main__':
     newsSvr = newsClass()
     news = newsSvr.show_news_list()
-    print('Don!')
+    print('-'*32)
+    if news:
+        print(news)
+    else:
+        print(' None News fetched. ')
+    print('-'*32)
