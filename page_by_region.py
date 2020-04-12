@@ -24,7 +24,6 @@ from plotly.validators.scatter.marker import SymbolValidator
 raw_symbols = SymbolValidator().values
 
 nav = Navbar()
-ds = CSBS()
 
 
 header = html.H3(
@@ -32,6 +31,8 @@ header = html.H3(
 )
 
 def load_options():
+    ds = CSBS()
+
     # data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
     region_of_interest = ds.regions()
     options = [{'label': x, 'value': x} for x in region_of_interest]
@@ -94,7 +95,7 @@ def App():
     [Input(component_id='tab1_TimeWindow', component_property='value'),
      Input('Region_of_interest', 'value')])
 def update_graph( date_window_option, region_of_interest):
-
+    ds = CSBS()
     dt_range = ds.date_range_str(date_window_option)
 
     confirmed = ds.refresh_category('Confirmed', date_window_option,region_of_interest)
@@ -120,7 +121,3 @@ def plot_figure( df , category , dt_range):
         }
     )
     return graph
-
-
-
-print('.... Page_by_region  loaded, id(ds):{}'.format( id(ds) )) 

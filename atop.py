@@ -14,8 +14,6 @@ from homepage import Homepage
 from init import app, server
 
 
-app.config.suppress_callback_exceptions = True
-
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content')

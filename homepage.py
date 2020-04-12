@@ -2,7 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-
+from scipy.signal import savgol_filter
 import utilities as utl
 
 import visdcc
@@ -20,19 +20,51 @@ def load_case_list(region="US"):
     return data_list_confirmed[region]
 
 def compute_increase_rate(region='US'):
+    print("...computing increase rate...\n")
     data_list_confirmed, date_list = utl.load_data_3(region)
     A = data_list_confirmed
-    print("confirmed data is ", A)
+    # print("confirmed data is ", A)
     rate = [(A[k+1] - A[k])/A[k]*100 for k in range(0, len(A)-1)]
     return rate
 
 def load_date_list_2(region='US'):
     data_list_confirmed, date_list = utl.load_data_3(region)
-    
     print("region is {}, date from {} ~ {}".format(region, date_list[0], date_list[-1]))
 
     return date_list[1:]
 
+def smooth_list(l, window=3, poly=1):
+    return savgol_filter(l, window, poly)
+
+def update_increase_rate_row(region = "US"):
+    return dbc.Row(
+            [
+
+                dbc.Col(
+                    [
+                        html.H2(region + " daily increase rate"),
+                        dcc.Graph(
+                            figure={"data": [
+                                {"x": load_date_list_2(region), "y": compute_increase_rate(region), 'mode': "lines+markers", 'name': region},
+                                {"x": load_date_list_2(region), "y":smooth_list(compute_increase_rate(region),9,2), 'mode':'lines+markers', 'name':'Smoothed'},
+                            ],
+                                "layout": utl.layout
+                            }
+                        ),
+                    ]
+                ),
+            ]
+        )
+                        
+                        
+def update_increase_list(region_list=['US','Italy','Spain']):
+    row_list=[]
+    for region in region_list:
+        row_list.append(update_increase_rate_row[region])
+    
+    return row_list
+                        
+# define the body layout                    
 
 body = dbc.Container(
     [
@@ -46,7 +78,8 @@ body = dbc.Container(
                             This coronavirus spreading is changing the world dramatically.
                             """
                         ),
-                        dbc.Button("View details", color="secondary"),
+                        html.A(html.Button('Details', className='google_result'), 
+                               href='https://www.worldometers.info/coronavirus/country/us/'),
                     ],
                     md=4,
                 ),
@@ -62,68 +95,18 @@ body = dbc.Container(
                                 "layout": utl.layout
                             }
                         ),
-                    ]
+                    ],
+                    md = 10,
                 ),
             ]
         ),
+                                  
+       update_increase_rate_row('US'),
 
-        dbc.Row(
-            [
+       update_increase_rate_row('Italy'),
 
-
-                dbc.Col(
-                    [
-                        html.H2("US daily increase rate"),
-                        dcc.Graph(
-                            figure={"data": [
-                                {"x": load_date_list_2("US"), "y": compute_increase_rate("US"), 'mode': "lines+markers", 'name': 'US'},
-
-                            ],
-                                "layout": utl.layout
-                            }
-                        ),
-                    ]
-                ),
-            ]
-        ),
-                        
-        dbc.Row(
-            [
-
-                dbc.Col(
-                    [
-                        html.H2("Italy daily increase rate"),
-                        dcc.Graph(
-                            figure={"data": [
-                                {"x": load_date_list_2("Italy"), "y": compute_increase_rate("Italy"), 'mode': "lines+markers", 'name': 'Italy'},
-
-                            ],
-                                "layout": utl.layout
-                            }
-                        ),
-                    ]
-                ),
-            ]
-        ),
-                        
-        dbc.Row(
-            [
-
-                dbc.Col(
-                    [
-                        html.H2("China daily increase rate"),
-                        dcc.Graph(
-                            figure={"data": [
-                                {"x": load_date_list_2("China"), "y": compute_increase_rate("China"), 'mode': "lines+markers", 'name': 'Italy'},
-
-                            ],
-                                "layout": utl.layout
-                            }
-                        ),
-                    ]
-                ),
-            ]
-        ),
+       update_increase_rate_row('Spain'),
+       
 
     ],
     className="mt-4",
