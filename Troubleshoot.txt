@@ -1,0 +1,31 @@
+1. run atop.py
+raise URLError(err)
+urllib.error.URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1049)>
+
+If you're using macOS go to Macintosh HD > Applications > Python3.6 folder (or whatever version of python you're using) > double click on "Install Certificates.command" file.
+
+2. pip install dateparser 
+ Running setup.py install for regex ... error
+    ERROR: Command errored out with exit status 1:
+     command: /Library/Frameworks/Python.framework/Versions/3.8/bin/python3.8 -u -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-install-kn6m3aao/regex/setup.py'"'"'; __file__='"'"'/private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-install-kn6m3aao/regex/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record /private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-record-10492jth/install-record.txt --single-version-externally-managed --compile
+         cwd: /private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-install-kn6m3aao/regex/
+    Complete output (17 lines):
+    running install
+    running build
+    running build_py
+    creating build
+    creating build/lib.macosx-10.9-x86_64-3.8
+    creating build/lib.macosx-10.9-x86_64-3.8/regex
+    copying regex_3/__init__.py -> build/lib.macosx-10.9-x86_64-3.8/regex
+    copying regex_3/regex.py -> build/lib.macosx-10.9-x86_64-3.8/regex
+    copying regex_3/_regex_core.py -> build/lib.macosx-10.9-x86_64-3.8/regex
+    copying regex_3/test_regex.py -> build/lib.macosx-10.9-x86_64-3.8/regex
+    running build_ext
+    building 'regex._regex' extension
+    creating build/temp.macosx-10.9-x86_64-3.8
+    creating build/temp.macosx-10.9-x86_64-3.8/regex_3
+    gcc -Wno-unused-result -Wsign-compare -Wunreachable-code -fno-common -dynamic -DNDEBUG -g -fwrapv -O3 -Wall -arch x86_64 -g -I/Library/Frameworks/Python.framework/Versions/3.8/include/python3.8 -c regex_3/_regex.c -o build/temp.macosx-10.9-x86_64-3.8/regex_3/_regex.o
+    xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun
+    error: command 'gcc' failed with exit status 1
+    ----------------------------------------
+ERROR: Command errored out with exit status 1: /Library/Frameworks/Python.framework/Versions/3.8/bin/python3.8 -u -c 'import sys, setuptools, tokenize; sys.argv[0] = '"'"'/private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-install-kn6m3aao/regex/setup.py'"'"'; __file__='"'"'/private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-install-kn6m3aao/regex/setup.py'"'"';f=getattr(tokenize, '"'"'open'"'"', open)(__file__);code=f.read().replace('"'"'\r\n'"'"', '"'"'\n'"'"');f.close();exec(compile(code, __file__, '"'"'exec'"'"'))' install --record /private/var/folders/yv/l9hm8v596ws94r4p36z6kwlh0000gp/T/pip-record-10492jth/install-record.txt --single-version-externally-managed --compile Check the logs for full command output.
