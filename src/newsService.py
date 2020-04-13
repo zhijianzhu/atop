@@ -225,7 +225,7 @@ class newsClass:
             return html.Ol([ 
                         html.Li([ 
                             html.A(x['title'], href=x['url'], target ='_blank' ),
-                            html.div(x['publishedAt'], style={'size':1,'color':"blue"}) 
+                            html.Div(x['publishedAt'], style={'size':1,'color':"blue"}) 
                                 ])
                         for x in news_list])
 
