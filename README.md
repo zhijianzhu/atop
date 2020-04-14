@@ -1,6 +1,6 @@
 # Track and Model COVID_19 Development
 
-# how to run it
+# all git pull first
 
 ## run the following:
   ```
