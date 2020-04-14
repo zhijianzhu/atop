@@ -14,4 +14,6 @@ newsapi-python
 uszipcode
 google-api-python-client
 dateparser
-visdcc
+scipy
+dateparser
+pgeocode

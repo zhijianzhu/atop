@@ -5,8 +5,6 @@ import dash_html_components as html
 from scipy.signal import savgol_filter
 import utilities as utl
 
-import visdcc
-
 from navbar import Navbar
 nav = Navbar()
 
