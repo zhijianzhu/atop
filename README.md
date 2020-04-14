@@ -2,5 +2,8 @@
 
 # how to run it
 
-## run python3 atop.py 
+## run the following:
+  ```
+  python3 atop.py 
+  ```
 ## open a browser and type: http://localhost:5000/
