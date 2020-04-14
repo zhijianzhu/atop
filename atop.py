@@ -7,8 +7,8 @@ from dash.dependencies import Input, Output
 import page_by_region
 import page_search
 import page_model
+import homepage
 
-from homepage import Homepage
 
 
 from init import app, server
@@ -29,21 +29,7 @@ def display_page(pathname):
     elif pathname == "/model":
         return page_model.load_layout()
     else:
-        return Homepage()
-
-
-# @app.callback(Output('output_2', 'children'),
-#               [Input('search', 'value')])
-# def update_graph_zipcode(zipcode):
-#     figure_2 = page_search.plot_figure(zipcode)
-#     return figure_2
-
-
-# @app.callback(Output('output_22', 'children'),
-#               [Input('search', 'value')])
-# def update_graph_zipcode2(zipcode):
-#     news_list = page_search.show_news_list(zipcode)
-#     return news_list
+        return homepage.load_layout()
 
 
 if __name__ == '__main__':

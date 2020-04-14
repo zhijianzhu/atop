@@ -67,8 +67,8 @@ def update_increase_list(region_list=['US', 'Italy', 'Spain']):
 
 # define the body layout
 
-
-body = dbc.Container([dbc.Row([dbc.Col([html.H1("Covid 19 Status"),
+def load_body():
+    return dbc.Container([dbc.Row([dbc.Col([html.H1("Covid 19 Status"),
                                         html.P("""
                             This coronavirus spreading is changing the world dramatically.
                             """),
@@ -100,17 +100,10 @@ body = dbc.Container([dbc.Row([dbc.Col([html.H1("Covid 19 Status"),
                      className="mt-4",
                      )
 
-footer = html.Script("""
-  <script type='text/javascript' src='https://www.counter12.com/ad.js?id=0wd8Zxd0ZW9Ddy4Y'>
-  </script>
-""")
-
-
-def Homepage():
+def load_layout():
     layout = html.Div([
         nav,
-        body,
-        footer
+        load_body(),
     ])
     return layout
 
@@ -118,5 +111,5 @@ def Homepage():
 if __name__ == "__main__":
 
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
-    app.layout = Homepage()
+    app.layout = load_layout()
     app.run_server()

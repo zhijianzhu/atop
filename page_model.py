@@ -8,7 +8,8 @@ import utilities as utl
 from navbar import Navbar
 nav = Navbar()
 
-body = dbc.Container(
+def load_body():
+    return  dbc.Container(
     [
         dbc.Row(
             [
@@ -29,7 +30,7 @@ body = dbc.Container(
 def load_layout():
     layout = html.Div([
         nav,
-        body
+        load_body(),
     ])
     return layout
 
