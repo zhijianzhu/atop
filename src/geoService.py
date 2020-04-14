@@ -1,47 +1,50 @@
-import math 
-import numpy as np 
+import math
+import numpy as np
 
 from uszipcode import SearchEngine
 from uszipcode import model
-        
 
-from  src.dataService  import dataServiceCSBS as CSBS 
+
+from src.dataService import dataServiceCSBS as CSBS
+
 
 class geoClass:
 
     class point:
-        def __init__(self, lng , lat ):
+        def __init__(self, lng, lat):
             self.lng = lng
-            self.lat = lat 
+            self.lat = lat
 
         def dict(self):
-            d = { 'lon':self.lng, 'lat':self.lat }
-            return d 
+            d = {'lon': self.lng, 'lat': self.lat}
+            return d
+
         def __str__(self):
             return 'lat:{}, lng:{}'.format(self.lat, self.lng)
 
     class rect:
         def __init__(self, x0, x1, y0, y1):
-            self.left = x0 
-            self.right = x1 
-            self.top = y1 
-            self.bottom = y0 
-        def __str__(self):
-            return '{} <--> {}, {} ^ {}'.format(self.left, self.right, self.bottom,self.top)
+            self.left = x0
+            self.right = x1
+            self.top = y1
+            self.bottom = y0
 
-    __instance = None 
+        def __str__(self):
+            return '{} <--> {}, {} ^ {}'.format(
+                self.left, self.right, self.bottom, self.top)
+
+    __instance = None
 
     def __new__(cls):
 
-        if not cls.__instance :
+        if not cls.__instance:
             cls.__instance = object.__new__(cls)
-            cls.__instance.__init__() 
-            print('.... geoClass Created, id:{}'.format( id(cls.__instance) ))
- 
-        return cls.__instance
-        
+            cls.__instance.__init__()
+            print('.... geoClass Created, id:{}'.format(id(cls.__instance)))
 
-    def __init__(self ):
+        return cls.__instance
+
+    def __init__(self):
 
         search = SearchEngine()
 
@@ -50,7 +53,7 @@ class geoClass:
         self.defaultRadius = 70
 
         self.ds = CSBS()
-        print('.... geoClass Initialized, id(self.ds):{}'.format( id( self.ds) ))
+        print('.... geoClass Initialized, id(self.ds):{}'.format(id(self.ds)))
 
     def geo_layout(self, title, projection='natural earth'):  # Confirmed Total
         layout = dict(title='CoronaVirus {} as of {}'.format(title, str(date.today())),
@@ -69,99 +72,90 @@ class geoClass:
         )
         return layout
 
-
-
     def distance(self, origin, destination):
         lat1, lon1 = origin
         lat2, lon2 = destination
         radius = 3959  # mile
 
-        dlat = math.radians(lat2-lat1)
-        dlon = math.radians(lon2-lon1)
-        a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-            * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(math.radians(lat1)) \
+            * math.cos(math.radians(lat2)) * math.sin(dlon / 2) * math.sin(dlon / 2)
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         d = radius * c
         return d
 
     def rectByZipAndEdge(self, center, edge):
-        # return the rect of lat/lon range 
-        lat, lng = center.lat, center.lng   
-        radius = 3959 # mile 
-        delta = float(edge) * 180 / radius / math.pi 
-        return self.rect(lng - delta, lng + delta , lat - delta, lat + delta) 
-
+        # return the rect of lat/lon range
+        lat, lng = center.lat, center.lng
+        radius = 3959  # mile
+        delta = float(edge) * 180 / radius / math.pi
+        return self.rect(lng - delta, lng + delta, lat - delta, lat + delta)
 
     def zipcodeInfo(self, zipcode):
 
         search = SearchEngine()
 
-        zipcode_info = search.by_zipcode(zipcode) # get info for the given zip code
+        # get info for the given zip code
+        zipcode_info = search.by_zipcode(zipcode)
         if not zipcode_info.zipcode:
             zipcode_info = self.defaultZipcodeInfo
 
-        return self.point(lng = zipcode_info.lng, lat = zipcode_info.lat )
+        return self.point(lng=zipcode_info.lng, lat=zipcode_info.lat)
 
+    def get_regions(self, zipcode='22030', radius=100):
 
-    def get_regions(self, zipcode = '22030', radius = 100):
-
-        zipcode_info = self.zipcodeInfo( zipcode ) 
+        zipcode_info = self.zipcodeInfo(zipcode)
 
         res = SearchEngine().query(
-            lat = zipcode_info.lat,
-            lng = zipcode_info.lng,
-            radius = radius,
-            sort_by = model.SimpleZipcode.population, #model.Zipcode.median_household_income,
-            ascending = False,
-            returns = 12,
-            )  # get 12 biggest cities around 100 miles around the given zip code
+            lat=zipcode_info.lat,
+            lng=zipcode_info.lng,
+            radius=radius,
+            # model.Zipcode.median_household_income,
+            sort_by=model.SimpleZipcode.population,
+            ascending=False,
+            returns=12,
+        )  # get 12 biggest cities around 100 miles around the given zip code
 
-        counties = set( [(r.post_office_city,r.state,r.county) for r in res])
+        counties = set([(r.post_office_city, r.state, r.county) for r in res])
 
-        return counties 
-
+        return counties
 
     def calc_zoom(self, rect):
-        #https://stackoverflow.com/questions/46891914/control-mapbox-extent-in-plotly-python-api
+        # https://stackoverflow.com/questions/46891914/control-mapbox-extent-in-plotly-python-api
         width_y = rect.top - rect.bottom
-        width_x = rect.right - rect.left 
-        zoom_y = -1.446*math.log(width_y) + 7.2753
-        zoom_x = -1.415*math.log(width_x) + 8.7068
-        return min(round(zoom_y,2),round(zoom_x,2))
-
+        width_x = rect.right - rect.left
+        zoom_y = -1.446 * math.log(width_y) + 7.2753
+        zoom_x = -1.415 * math.log(width_x) + 8.7068
+        return min(round(zoom_y, 2), round(zoom_x, 2))
 
     def geo_data(self, category, zipcode, radius):
-
 
         self.center = self.zipcodeInfo(zipcode)
         self.radius = radius
 
-        self.rectArea = self.rectByZipAndEdge( self.center, radius)
+        self.rectArea = self.rectByZipAndEdge(self.center, radius)
 
         self.zoom = self.calc_zoom(self.rectArea)
 
-
         df = self.ds.dataSet[category].copy()
 
+        df = df[['County_Name', 'Latitude',
+                 'Longitude', self.ds.latest_date]].fillna(0)
+        df = df.rename(columns={self.ds.latest_date: category})
 
-        df = df[['County_Name','Latitude', 'Longitude', self.ds.latest_date ]].fillna(0)
-        df = df.rename(columns = {self.ds.latest_date:category})
+        df['size'] = df.apply(lambda r: np.log10(r[category] + 1), axis=1)
 
-        df['size'] = df.apply( lambda r: np.log10(r[category] + 1 ) , axis = 1 )
-       
-        df = df[ df['Longitude'] <= self.rectArea.right ]
-        df = df[ df['Longitude'] >= self.rectArea.left ]
-        df = df[ df['Latitude'] <= self.rectArea.top ]
-        df = df[ df['Latitude'] >= self.rectArea.bottom ]
+        df = df[df['Longitude'] <= self.rectArea.right]
+        df = df[df['Longitude'] >= self.rectArea.left]
+        df = df[df['Latitude'] <= self.rectArea.top]
+        df = df[df['Latitude'] >= self.rectArea.bottom]
 
-        return df 
-
-
+        return df
 
     def search_by_zipcode(self, zipcode="21029"):
 
         df_conf = self.ds.dataSet["Confirmed"]
-
 
         date_cols = [c for c in df_conf.columns if '/20' in c]
 
@@ -198,21 +192,17 @@ class geoClass:
     #     latlong_df = pd.DataFrame.from_records(list_dict)
     #     latlong_df.to_csv('../data/lat_long_by_loc_name.csv')
 
+
 if __name__ == '__main__':
     geo = geoClass()
 
     zipcode = '21029'
     radius = '100'
 
-
     center = geo.zipcodeInfo(zipcode)
-    rectArea = geo.rectByZipAndEdge( center, radius)
+    rectArea = geo.rectByZipAndEdge(center, radius)
     zoom = geo.calc_zoom(rectArea)
 
-
-
-    print('center: {}'.format( center  ) )
-    print('rectArea: {}'.format( rectArea) )
-    print('zoom: {}'.format( zoom) )
-
-
+    print('center: {}'.format(center))
+    print('rectArea: {}'.format(rectArea))
+    print('zoom: {}'.format(zoom))

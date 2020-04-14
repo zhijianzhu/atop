@@ -51,7 +51,7 @@ def dataSource(category: int) -> str:
 
     fn = dataSources.get(category)
 
-    url_path = base_url+fn if fn else fn
+    url_path = base_url + fn if fn else fn
     #print("url path is ", url_path)
 
     return url_path
@@ -62,17 +62,20 @@ def distance(origin, destination):
     lat2, lon2 = destination
     radius = 3959  # mile
 
-    dlat = math.radians(lat2-lat1)
-    dlon = math.radians(lon2-lon1)
-    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-        * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(math.radians(lat1)) \
+        * math.cos(math.radians(lat2)) * math.sin(dlon / 2) * math.sin(dlon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     d = radius * c
     return d
 
+
 def row_dist(r, zipinfo):
-    dist = distance((zipinfo['latitude'], zipinfo['longitude']), (r['Lat'], r['Long']))
+    dist = distance(
+        (zipinfo['latitude'], zipinfo['longitude']), (r['Lat'], r['Long']))
     return dist
+
 
 def config_geo_layout():
 
@@ -93,22 +96,36 @@ def config_geo_layout():
     def get_text(r):
         # print(r['Province/State'])
         if str(r['Province/State']) != 'nan':
-            return r['Province/State'] + '<br>' + 'Confirmed: ' + str(r['total'])
+            return r['Province/State'] + '<br>' + \
+                'Confirmed: ' + str(r['total'])
         else:
-            return r['Country/Region'] + '<br>' + 'Confirmed: ' + str(r['total'])
+            return r['Country/Region'] + '<br>' + \
+                'Confirmed: ' + str(r['total'])
 
     df_conf['text'] = df_conf.apply(get_text, axis=1)
     median_val = df_conf['total'].median()
 
     # scl = [ [0,"rgb(5, 10, 172)"],[0.35,"rgb(40, 60, 190)"],[0.5,"rgb(70, 100, 245)"],\
     #     [0.6,"rgb(90, 120, 245)"],[0.7,"rgb(106, 137, 247)"],[1,"rgb(220, 220, 220)"] ]
-    scl = [[0, "rgb(5, 10, 172)"], [0.35, "rgb(40, 60, 190)"], [0.5, "rgb(70, 100, 245)"],
-           [0.6, "rgb(90, 120, 245)"], [0.7, "rgb(106, 137, 247)"], [1, "rgb(240, 210, 250)"]]
+    scl = [
+        [
+            0, "rgb(5, 10, 172)"], [
+            0.35, "rgb(40, 60, 190)"], [
+                0.5, "rgb(70, 100, 245)"], [
+                    0.6, "rgb(90, 120, 245)"], [
+                        0.7, "rgb(106, 137, 247)"], [
+                            1, "rgb(240, 210, 250)"]]
 
     df_deaths['text'] = df_deaths.apply(get_text, axis=1)
 
-    scl = [[0, "rgb(5, 10, 172)"], [0.35, "rgb(40, 60, 190)"], [0.5, "rgb(70, 100, 245)"],
-           [0.6, "rgb(90, 120, 245)"], [0.7, "rgb(106, 137, 247)"], [1, "rgb(220, 220, 220)"]]
+    scl = [
+        [
+            0, "rgb(5, 10, 172)"], [
+            0.35, "rgb(40, 60, 190)"], [
+                0.5, "rgb(70, 100, 245)"], [
+                    0.6, "rgb(90, 120, 245)"], [
+                        0.7, "rgb(106, 137, 247)"], [
+                            1, "rgb(220, 220, 220)"]]
 
     median_val_d = df_deaths['total'].median()
 
@@ -171,7 +188,14 @@ def load_data():
     date_list = df_Confirmed.columns.to_list()
     date_list = date_list[34:]
 
-    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
+    region_of_interest = [
+        'US',
+        'Germany',
+        'Italy',
+        'United Kingdom',
+        'Canada',
+        'Iran',
+        'Spain']
 
     def update_number_by_region(df=df_Confirmed):
         data_list = []
@@ -182,7 +206,10 @@ def load_data():
 
             confirmed_number = list(np.sum(np.array(df_1[date_list]), axis=0))
             confirmed_number = [int(x) for x in confirmed_number]
-            data_list.append({'x': date_list, 'y': confirmed_number, 'mode': 'lines+markers', 'name': region})
+            data_list.append({'x': date_list,
+                              'y': confirmed_number,
+                              'mode': 'lines+markers',
+                              'name': region})
 
         return data_list
 
@@ -194,6 +221,7 @@ def load_data():
 
     return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
 
+
 def load_data_2():
 
     df_Confirmed = pd.read_csv(dataSource("Confirmed"))
@@ -204,7 +232,14 @@ def load_data_2():
 
     date_list = df_Confirmed.columns.to_list()
 
-    region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain']
+    region_of_interest = [
+        'US',
+        'Germany',
+        'Italy',
+        'United Kingdom',
+        'Canada',
+        'Iran',
+        'Spain']
 
     date_list = date_list[35:]
 
@@ -228,6 +263,7 @@ def load_data_2():
 
     return data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest
 
+
 def load_data_3(region='US'):
 
     df_Confirmed = pd.read_csv(dataSource("Confirmed"))
@@ -235,20 +271,23 @@ def load_data_3(region='US'):
     date_list = df_Confirmed.columns.to_list()
     if region == "US":
         limited_date_list = date_list[45:]
-    elif region== "Italy":
+    elif region == "Italy":
         limited_date_list = date_list[36:]
     elif region == "China":
         limited_date_list = date_list[4:]
     else:
         limited_date_list = date_list[36:]
 
-
     def update_number_by_region(df=df_Confirmed):
 
         df_1 = df[df['Country/Region'] == region]
         df_1 = df_1.fillna(0)
 
-        confirmed_number = list(np.sum(np.array(df_1[limited_date_list]), axis=0))
+        confirmed_number = list(
+            np.sum(
+                np.array(
+                    df_1[limited_date_list]),
+                axis=0))
         confirmed_number = [int(x) for x in confirmed_number]
 
         return confirmed_number
@@ -258,6 +297,7 @@ def load_data_3(region='US'):
     # print(data_list_confirmed)
 
     return data_list_confirmed, limited_date_list
+
 
 def organize_figure_structure(data):
 
@@ -307,7 +347,9 @@ def fetch_lat_long_by_name():
                 else:
                     location = geolocator.geocode(l)
                 unqueried.remove(l)
-                list_dict.append({'Province/State': l, 'Lat': location.latitude, 'Long': location.longitude})
+                list_dict.append({'Province/State': l,
+                                  'Lat': location.latitude,
+                                  'Long': location.longitude})
             except BaseException:
                 print('time out for querying %s' % l)
 

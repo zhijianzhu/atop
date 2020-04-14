@@ -26,8 +26,18 @@ class dataServiceCSSE:
 
         self.today = date.today()  # check wether date changed
         self.categories = ['Confirmed', 'Deaths', 'Recovered']
-        self.region_of_interest = ['US', 'Germany', 'Italy', 'United Kingdom', 'Canada', 'Iran', 'Spain', 'China', 'Japan', 'Singapore', 'Australia'
-                                   ]
+        self.region_of_interest = [
+            'US',
+            'Germany',
+            'Italy',
+            'United Kingdom',
+            'Canada',
+            'Iran',
+            'Spain',
+            'China',
+            'Japan',
+            'Singapore',
+            'Australia']
         self.init_dataSet()
 
     def regions(self):
@@ -59,7 +69,7 @@ class dataServiceCSSE:
 
         fn = dataSources.get(category)
 
-        return base_url+fn if fn else fn
+        return base_url + fn if fn else fn
 
     def init_date_range(self, df):
         # if ALL_DATES already populated, use it directdly in the same day
@@ -92,11 +102,12 @@ class dataServiceCSSE:
         ret = []
         for category in ['Confirmed', 'Deaths', 'Recovered']:
             ret.append(self.refresh_category(category,
-                                              date_list,
-                                              region_of_interest
-                                              ))
+                                             date_list,
+                                             region_of_interest
+                                             ))
 
-        return ret[0], ret[1], ret[2], ' {} ~ {}'.format(date_list[0], date_list[-1])
+        return ret[0], ret[1], ret[2], ' {} ~ {}'.format(
+            date_list[0], date_list[-1])
 
     def refresh_category(self, category, date_list, region_of_interest):
 
@@ -110,9 +121,11 @@ class dataServiceCSSE:
 
             counts = list(np.sum(np.array(df_1[date_list]), axis=0))
             counts = [int(x) for x in counts]
-            ret.append({'x': date_list, 'y': counts, 'mode': 'lines+markers', 'name': region})
+            ret.append({'x': date_list, 'y': counts,
+                        'mode': 'lines+markers', 'name': region})
 
         return ret
+
 
 class dataServiceCSBS(object):
     '''
@@ -126,28 +139,27 @@ class dataServiceCSBS(object):
 
     '''
 
-    __instance = None 
-    __today = None 
+    __instance = None
+    __today = None
 
     def __new__(cls, *agrs, **kwargs):
 
         if not cls.__instance:
             cls.__instance = object.__new__(cls, *agrs, **kwargs)
             cls.__instance.__init__()
-            print('.... dataServiceCSBS Created, id:{}'.format( id(cls.__instance) ))
+            print('.... dataServiceCSBS Created, id:{}'.format(id(cls.__instance)))
 
-        # check wether date changed, to determine init_dataSet 
+        # check wether date changed, to determine init_dataSet
         if cls.__today != date.today():
             cls.__today = date.today()
             cls.__instance.init_dataSet()
-            print('.... dataServiceCSBS init DataSet for {}'.format( cls.__today ))
+            print('.... dataServiceCSBS init DataSet for {}'.format(cls.__today))
 
-        return cls.__instance 
-
+        return cls.__instance
 
     def __init__(self):
 
-        # self.__today = date.today()  
+        # self.__today = date.today()
         self.categories = ['Confirmed', 'Deaths']
         self.all_date_range = []
         self.df_columns = ['County_Name', 'State_Name',
@@ -163,30 +175,30 @@ class dataServiceCSBS(object):
     def init_regions(self, Confirmed):
         #
         sample_date = self.all_date_range[-1]
-        s = Confirmed[['State_Name', sample_date ]].groupby(['State_Name'])\
+        s = Confirmed[['State_Name', sample_date]].groupby(['State_Name'])\
             .sum().sort_values(sample_date, ascending=False)
         self.region_of_interest = s.index.tolist()  # [0:17]
 
     def read_csv(self, fn):
         '''
-        Instead of fetch from url, this function will try to loacte 
-        the csv file from local drive 
+        Instead of fetch from url, this function will try to loacte
+        the csv file from local drive
         '''
 
         csv_base_url = 'https://raw.githubusercontent.com/tomquisel/covid19-data/master/'
-
 
         local_data_folder = './data/CSBS/'
 
         if not os.path.exists(local_data_folder):
             os.mkdir(local_data_folder)
 
-        local_data_fn = os.path.join(local_data_folder, fn[9:]) # remove prefix data/csv/
+        local_data_fn = os.path.join(
+            local_data_folder, fn[9:])  # remove prefix data/csv/
 
         try:
-            Confirmed = pd.read_csv( local_data_fn,  error_bad_lines=False)
-        except:
-            Confirmed = pd.read_csv(csv_base_url + fn , error_bad_lines=False)
+            Confirmed = pd.read_csv(local_data_fn, error_bad_lines=False)
+        except BaseException:
+            Confirmed = pd.read_csv(csv_base_url + fn, error_bad_lines=False)
             Confirmed.to_csv(local_data_fn, index=False)
 
         return Confirmed
@@ -199,13 +211,13 @@ class dataServiceCSBS(object):
 
         git_master_url = "https://github.com/tomquisel/covid19-data/tree/master/"
 
-
         csvs = findall('data/csv/2020-0[0-9-]{4}.csv',
-                       requests.get(git_master_url+'data/csv/').text)
+                       requests.get(git_master_url + 'data/csv/').text)
 
         self.all_date_range = []
         Confirmed = self.read_csv(csvs[0])
-        Confirmed[['Latitude', 'Longitude']] = Confirmed[['Latitude', 'Longitude']] .astype(float)
+        Confirmed[['Latitude', 'Longitude']] = Confirmed[[
+            'Latitude', 'Longitude']] .astype(float)
 
         #Confirmed.set_index(['County_Name','State_Name'], inplace=True)
 
@@ -213,7 +225,7 @@ class dataServiceCSBS(object):
 
         for csv in csvs:
 
-            data = self.read_csv(csv) 
+            data = self.read_csv(csv)
             date = csv[9:-4]  # 2020-mm-dd
 
             # print(Confirmed.columns)
@@ -227,7 +239,7 @@ class dataServiceCSBS(object):
             d = data[['County_Name', 'State_Name', 'Death']]
             d.columns = c.columns
             Deaths = pd.merge(Deaths, d, how='left',
-                             on=['County_Name', 'State_Name'])
+                              on=['County_Name', 'State_Name'])
 
             self.all_date_range.append(date)
 
@@ -239,7 +251,6 @@ class dataServiceCSBS(object):
         self.date_list = self.all_date_range
 
         self.init_regions(Confirmed)
-
 
     def date_range(self, date_window_option='ALL'):
         # ALL, MONS, MON, WEEKS, WEEK
@@ -259,14 +270,18 @@ class dataServiceCSBS(object):
             if ymd in self.all_date_range:
                 ret.append(ymd)
 
-        self.date_list = ret 
-        
+        self.date_list = ret
+
         return ret
 
-    def refresh_category(self, category: str, date_window_option, region_of_interest):
+    def refresh_category(
+            self,
+            category: str,
+            date_window_option,
+            region_of_interest):
         # refresh data as per :category, date list and region of interest
         self.refresh_dataSet()
-        
+
         df = self.dataSet[category].copy()
 
         self.date_list = self.date_range(date_window_option)
@@ -280,7 +295,7 @@ class dataServiceCSBS(object):
             counts = list(np.sum(np.array(df_1[self.date_list]), axis=0))
             counts = [int(x) for x in counts]
             ret.append({'x': self.date_list, 'y': counts,
-                     'name': region,'mode':'lines+markers'   })
+                        'name': region, 'mode': 'lines+markers'})
 
         return ret
 
@@ -296,5 +311,5 @@ class dataServiceCSBS(object):
 
 #ds = dataServiceCSBS()
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #     print(ds.columns)

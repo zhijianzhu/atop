@@ -25,6 +25,7 @@ body = dbc.Container(
     className="mt-4",
 )
 
+
 def load_layout():
     layout = html.Div([
         nav,

@@ -86,9 +86,13 @@ def organize_figure_structure(data):
 def update_graph_confirmed(date_window_option, region_of_interest):
 
     dt_range = ds.date_range_str(date_window_option)
-    confirmed = ds.refresh_catetgory('Confirmed', date_window_option, region_of_interest)
+    confirmed = ds.refresh_catetgory(
+        'Confirmed',
+        date_window_option,
+        region_of_interest)
 
-    return organize_figure_structure(confirmed), 'Time Window:{}'.format(dt_range)
+    return organize_figure_structure(
+        confirmed), 'Time Window:{}'.format(dt_range)
 
 
 @app.callback(
@@ -100,7 +104,10 @@ def update_graph_recovered(date_window_option, region_of_interest):
     if 'Recovered' not in ds.categories:
         return None
 
-    Recovered = ds.refresh_catetgory('Recovered', date_window_option, region_of_interest)
+    Recovered = ds.refresh_catetgory(
+        'Recovered',
+        date_window_option,
+        region_of_interest)
     return organize_figure_structure(Recovered)
 
 
@@ -110,6 +117,9 @@ def update_graph_recovered(date_window_option, region_of_interest):
      Input('tab1_Region_of_interest', 'value')])
 def update_graph_death(date_window_option, region_of_interest):
 
-    death = ds.refresh_catetgory('Deaths', date_window_option, region_of_interest)
+    death = ds.refresh_catetgory(
+        'Deaths',
+        date_window_option,
+        region_of_interest)
 
     return organize_figure_structure(death)

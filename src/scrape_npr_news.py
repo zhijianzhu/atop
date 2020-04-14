@@ -18,7 +18,8 @@ p_tags = soup.find_all('p')
 # Get the text from each of the “p” tags and strip surrounding whitespace.
 p_tags_text = [tag.get_text().strip() for tag in p_tags]
 
-# Filter out sentences that contain newline characters '\n' or don't contain periods.
+# Filter out sentences that contain newline characters '\n' or don't
+# contain periods.
 sentence_list = [sentence for sentence in p_tags_text if '\n' not in sentence]
 sentence_list = [sentence for sentence in sentence_list if '.' in sentence]
 # Combine list items into string.

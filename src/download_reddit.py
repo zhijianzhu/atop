@@ -2,8 +2,11 @@ import praw
 import pandas as pd
 import datetime as dt
 
+
 def get_date(created):
-    return dt.datetime.strftime(dt.datetime.fromtimestamp(created), '%Y-%m-%d %H:%M:%S')
+    return dt.datetime.strftime(
+        dt.datetime.fromtimestamp(created),
+        '%Y-%m-%d %H:%M:%S')
 
 
 class reddit_downloader:
@@ -56,8 +59,15 @@ class reddit_downloader:
             topics_dict["created"].append(submission.created)
             topics_dict["body"].append(submission.selftext)
             # topics_dict["comments"].append([(c.author.name,c.body) for c in submission.comments if c is not None and isinstance(c, praw.models.reddit.comment.Comment) and c.author is not None])
-            topics_dict["comments"].append([{'created': get_date(c.created), 'author': c.author.name, 'body': c.body}
-                                            for c in submission.comments if c is not None and isinstance(c, praw.models.reddit.comment.Comment) and c.author is not None])
+            topics_dict["comments"].append(
+                [
+                    {
+                        'created': get_date(
+                            c.created),
+                        'author': c.author.name,
+                        'body': c.body} for c in submission.comments if c is not None and isinstance(
+                        c,
+                        praw.models.reddit.comment.Comment) and c.author is not None])
             topics_dict["is_original"].append(submission.is_original_content)
             topics_dict['upvote_ratio'].append(submission.upvote_ratio)
             cnt += 1

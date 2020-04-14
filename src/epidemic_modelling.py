@@ -14,7 +14,8 @@ gamma = 0.14286
 I0 = 1e-6
 ND = 70
 TS = 1.0
-INPUT = (1.0-I0, I0)
+INPUT = (1.0 - I0, I0)
+
 
 def diff_eqs(INP, t):
     '''The main set of equations'''
@@ -28,7 +29,7 @@ def diff_eqs(INP, t):
 t_start = 0.0
 t_end = ND
 t_inc = TS
-t_range = np.arange(t_start, t_end+t_inc, t_inc)
+t_range = np.arange(t_start, t_end + t_inc, t_inc)
 RES = spi.odeint(diff_eqs, INPUT, t_range)
 
 print(RES)
