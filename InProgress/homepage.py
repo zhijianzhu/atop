@@ -6,6 +6,7 @@ from scipy.signal import savgol_filter
 import utilities as utl
 
 from navbar import Navbar
+
 nav = Navbar()
 
 
@@ -17,6 +18,11 @@ def load_date_list():
 def load_case_list(region="US"):
     data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
     return data_list_confirmed[region]
+
+
+def load_death_list(region="US"):
+    data_list_confirmed, data_list_deaths, data_list_recovered, date_list, region_of_interest = utl.load_data_2()
+    return data_list_deaths[region]
 
 
 def compute_increase_rate(region='US'):
@@ -65,51 +71,53 @@ def update_increase_list(region_list=['US', 'Italy', 'Spain']):
 
     return row_list
 
+
 # define the body layout
 
 def load_body():
     return dbc.Container([dbc.Row([dbc.Col([html.H1("Covid 19 Status"),
-                                        html.P("""
+                                            html.P("""
                             This coronavirus spreading is changing the world dramatically.
                             """),
-                                        html.A(html.Button('Details',
-                                                           className='google_result'),
-                                               href='https://www.worldometers.info/coronavirus/country/us/'),
-                                        ],
-                                       md=4,
-                                       ),
+                                            html.A(html.Button('Details',
+                                                               className='google_result'),
+                                                   href='https://www.worldometers.info/coronavirus/country/us/'),
+                                            ],
+                                           md=4,
+                                           ),
                                    html.Div([dcc.Dropdown(
                                        id='Region_of_interest',
                                        options=[
-            {'label': 'US', 'value': 'US'},
-            {'label': 'Italy', 'value': 'Italy'},
-            {'label': 'Spain', 'value': 'Spain'}
-        ],
+                                           {'label': 'US', 'value': 'US'},
+                                           {'label': 'Italy', 'value': 'Italy'},
+                                           {'label': 'Spain', 'value': 'Spain'}
+                                       ],
                                        value='US'
                                    ),
                                        html.Div(id='dd-output-container')
                                    ]),
-                               dbc.Col([html.H2("Confirmed cases"),
-                                        dcc.Graph(figure={"data": [{"x": load_date_list(),
-                                                                    "y": load_case_list("US"),
-                                                                    'mode': "lines+markers",
-                                                                    'name': 'US'},
-                                                                   {"x": load_date_list(),
-                                                                    "y": load_case_list("Italy"),
-                                                                    'mode': "lines+markers",
-                                                                    'name': 'Italy'},
-                                                                   ],
-                                                          "layout": utl.layout}),
-                                        ],
-                                       md=10,
-                                       ),
-                               ]),
-                      update_increase_rate_row('US'),
-                      update_increase_rate_row('Italy'),
-                      update_increase_rate_row('Spain'),
-                      ],
-                     className="mt-4",
-                     )
+                                   dbc.Col([html.H2("Confirmed cases"),
+                                            dcc.Graph(figure={"data": [{"x": load_date_list(),
+                                                                        "y": load_case_list("US"),
+                                                                        'mode': "lines+markers",
+                                                                        'name': 'Confirmed Cases'},
+                                                                       {"x": load_date_list(),
+                                                                        "y": load_death_list("US"),
+                                                                        'mode': "lines+markers",
+                                                                        'name': 'Death Cases'},
+                                                                       ],
+                                                              "layout": utl.layout}),
+                                            ],
+                                           md=10,
+                                           ),
+                                   ]),
+                          update_increase_rate_row('US'),
+                          update_increase_rate_row('Italy'),
+                          update_increase_rate_row('Spain'),
+                          ],
+                         className="mt-4",
+                         )
+
 
 def load_layout():
     layout = html.Div([
@@ -119,8 +127,9 @@ def load_layout():
     return layout
 
 
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.UNITED])
     app.layout = load_layout()
     app.run_server()
