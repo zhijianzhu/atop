@@ -1,0 +1,59 @@
+country_of_interest = [
+        'US',
+        'Germany',
+        'Italy',
+        'United Kingdom',
+        'Canada',
+        'Iran',
+        'Spain']
+def load_country_options():
+    options = [{'label': x, 'value': x} for x in country_of_interest]
+    defaults = country_of_interest[:7]
+
+    return options, defaults
+
+
+country_options, country_defaults = load_country_options()
+
+dropdown = html.Div(dcc.Dropdown(
+    id='country_rate',
+    options=country_options,
+    value=country_defaults,
+    multi=False,
+
+))
+
+
+
+confirmedGraph = html.Div(id='country_daily_rate_graph',
+                          children=[],
+                          )
+
+
+
+
+
+@app.callback(
+    [Output(component_id='country_daily_rate_graph', component_property='children'),
+     ],
+    [Input('country_of_interest', 'value')])
+
+def update_graph(country_of_interest):
+return dbc.Row([dbc.Col([html.H2(country_options + " daily increase rate"),
+                             dcc.Graph(figure={"data": [{"x": load_date_list_2(country_options),
+                                                         "y": compute_increase_rate(country_options),
+                                                         'mode': "lines+markers",
+                                                         'name': country_options},
+                                                        {"x": load_date_list_2(country_options),
+                                                         "y": smooth_list(compute_increase_rate(country_options),
+                                                                          9,
+                                                                          2),
+                                                         'mode': 'lines+markers',
+                                                         'name': 'Smoothed'},
+                                                        ],
+                                               #"layout": utl.layout 
+                                                
+                                               }),                                              
+                                ],
+                                md = 10,),
+                    ])
