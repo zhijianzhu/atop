@@ -2,8 +2,10 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Output, Input
 from scipy.signal import savgol_filter
 import utilities as utl
+from init import app
 
 from navbar import Navbar
 
@@ -59,8 +61,11 @@ def update_increase_rate_row(region="US"):
                                                          'mode': 'lines+markers',
                                                          'name': 'Smoothed'},
                                                         ],
-                                               "layout": utl.layout}),
-                             ]),
+                                               # "layout": utl.layout
+
+                                               }),
+                             ],
+                            md=10, ),
                     ])
 
 
@@ -97,7 +102,8 @@ def load_body():
                                        html.Div(id='dd-output-container')
                                    ]),
                                    dbc.Col([html.H2("Confirmed cases"),
-                                            dcc.Graph(figure={"data": [{"x": load_date_list(),
+                                            dcc.Graph(id='confirmed cases vs death',
+                                                      figure={"data": [{"x": load_date_list(),
                                                                         "y": load_case_list("US"),
                                                                         'mode': "lines+markers",
                                                                         'name': 'Confirmed Cases'},
@@ -106,7 +112,8 @@ def load_body():
                                                                         'mode': "lines+markers",
                                                                         'name': 'Death Cases'},
                                                                        ],
-                                                              "layout": utl.layout}),
+                                                              # "layout": utl.layout
+                                                              }),
                                             ],
                                            md=10,
                                            ),
@@ -119,14 +126,30 @@ def load_body():
                          )
 
 
+@app.callback(
+    Output('confirmed cases vs death', 'figure'),
+    [Input('Region_of_interest', 'value')])
+def update_figure(value):
+    return {
+        "data": [{"x": load_date_list(),
+                  "y": load_case_list(value),
+                  'mode': "lines+markers",
+                  'name': 'Confirmed Cases'},
+                 {"x": load_date_list(),
+                  "y": load_death_list(value),
+                  'mode': "lines+markers",
+                  'name': 'Death Cases'},
+                 ],
+        # "layout": utl.layout
+    }
+
+
 def load_layout():
     layout = html.Div([
         nav,
         load_body(),
     ])
     return layout
-
-
 
 
 if __name__ == "__main__":
