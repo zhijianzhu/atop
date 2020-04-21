@@ -36,6 +36,15 @@ def compute_increase_rate(region='US'):
     return rate
 
 
+def compute_death_increase_rate(region='US'):
+    print("...computing death increase rate...\n")
+    data_list_deaths, date_list = utl.load_data_4(region)
+    A = data_list_deaths
+    # print("confirmed data is ", A)
+    rate = [(A[k + 1] - A[k]) / A[k] * 100 for k in range(0, len(A) - 1)]
+    return rate
+
+
 def load_date_list_2(region='US'):
     data_list_confirmed, date_list = utl.load_data_3(region)
     print("region is {}, date from {} ~ {}".format(
@@ -49,81 +58,103 @@ def smooth_list(l, window=3, poly=1):
 
 
 def update_increase_rate_row(region="US"):
-    return dbc.Row([dbc.Col([html.H2(region + " daily increase rate"),
-                             dcc.Graph(figure={"data": [{"x": load_date_list_2(region),
-                                                         "y": compute_increase_rate(region),
-                                                         'mode': "lines+markers",
-                                                         'name': region},
-                                                        {"x": load_date_list_2(region),
-                                                         "y": smooth_list(compute_increase_rate(region),
-                                                                          9,
-                                                                          2),
-                                                         'mode': 'lines+markers',
-                                                         'name': 'Smoothed'},
-                                                        ],
-                                               # "layout": utl.layout
+    return dbc.Row([dbc.Col([
+        dcc.Graph(id='increase rate',
+                  figure={"data": [{"x": load_date_list_2(region),
+                                    "y": compute_increase_rate(region),
+                                    'mode': "lines+markers",
+                                    'name': region + " Confirmed"},
+                                   {"x": load_date_list_2(region),
+                                    "y": smooth_list(compute_increase_rate(region),
+                                                     9,
+                                                     2),
+                                    'mode': 'lines+markers',
+                                    'name': 'Smoothed Confirmed'},
+                                   {"x": load_date_list_2(region),
+                                    "y": compute_death_increase_rate(region),
+                                    'mode': "lines+markers",
+                                    'name': region + " Death"},
+                                   {"x": load_date_list_2(region),
+                                    "y": smooth_list(compute_death_increase_rate(region),
+                                                     9,
+                                                     2),
+                                    'mode': "lines+markers",
+                                    'name': 'Smoothed Death'},
+                                   ],
+                          'layout': {
+                              'title': region + " Daily Confirmed and Death Increase Rate"
+                          }
+                          }),
+    ],
+        width="auto",
+    ),
+    ])
 
-                                               }),
-                             ],
-                            md=10, ),
-                    ])
 
-
-def update_increase_list(region_list=['US', 'Italy', 'Spain']):
-    row_list = []
-    for region in region_list:
-        row_list.append(update_increase_rate_row[region])
-
-    return row_list
+def confirmed_vs_death(region="US"):
+    return dbc.Row([dbc.Col([
+        dcc.Graph(id='confirmed cases vs death',
+                  figure={"data": [{"x": load_date_list(),
+                                    "y": load_case_list("US"),
+                                    'mode': "lines+markers",
+                                    'name': 'Confirmed Cases'},
+                                   {"x": load_date_list(),
+                                    "y": load_death_list("US"),
+                                    'mode': "lines+markers",
+                                    'name': 'Death Cases'},
+                                   ],
+                          'layout': {
+                              'title': region + " Daily Confirmed and Death Chart"
+                          }
+                          }),
+    ],
+        width="auto",
+    ),
+    ])
 
 
 # define the body layout
 
 def load_body():
-    return dbc.Container([dbc.Row([dbc.Col([html.H1("Covid 19 Status"),
-                                            html.P("""
-                            This coronavirus spreading is changing the world dramatically.
-                            """),
-                                            html.A(html.Button('Details',
-                                                               className='google_result'),
-                                                   href='https://www.worldometers.info/coronavirus/country/us/'),
-                                            ],
-                                           md=4,
-                                           ),
-                                   html.Div([dcc.Dropdown(
-                                       id='Region_of_interest',
-                                       options=[
-                                           {'label': 'US', 'value': 'US'},
-                                           {'label': 'Italy', 'value': 'Italy'},
-                                           {'label': 'Spain', 'value': 'Spain'}
-                                       ],
-                                       value='US'
-                                   ),
-                                       html.Div(id='dd-output-container')
-                                   ]),
-                                   dbc.Col([html.H2("Confirmed cases"),
-                                            dcc.Graph(id='confirmed cases vs death',
-                                                      figure={"data": [{"x": load_date_list(),
-                                                                        "y": load_case_list("US"),
-                                                                        'mode': "lines+markers",
-                                                                        'name': 'Confirmed Cases'},
-                                                                       {"x": load_date_list(),
-                                                                        "y": load_death_list("US"),
-                                                                        'mode': "lines+markers",
-                                                                        'name': 'Death Cases'},
-                                                                       ],
-                                                              # "layout": utl.layout
-                                                              }),
-                                            ],
-                                           md=10,
-                                           ),
-                                   ]),
-                          update_increase_rate_row('US'),
-                          update_increase_rate_row('Italy'),
-                          update_increase_rate_row('Spain'),
-                          ],
-                         className="mt-4",
-                         )
+    return html.Div(
+        [dbc.Row([dbc.Col([
+            html.Div([dcc.Dropdown(
+                id='Region_of_interest',
+                options=[
+                    {'label': 'US', 'value': 'US'},
+                    {'label': 'Italy', 'value': 'Italy'},
+                    {'label': 'Spain', 'value': 'Spain'}
+                ],
+                value='US',
+                clearable=False,
+                style={'width': '6px'} ##TODO
+
+            ),
+            ],
+            ),
+        ],
+        ),
+        ],
+        ),
+
+            dbc.Row([
+                dbc.Col([
+                    html.Div(confirmed_vs_death('US'),
+                             ),
+                ]
+                ),
+                dbc.Col([
+                    html.Div(update_increase_rate_row('US'),
+                             ),
+
+                ],
+                ),
+
+            ]
+            )
+        ],
+        style={"border": "2px black solid"} ##TODO
+    )
 
 
 @app.callback(
@@ -140,7 +171,41 @@ def update_figure(value):
                   'mode': "lines+markers",
                   'name': 'Death Cases'},
                  ],
-        # "layout": utl.layout
+        'layout': {
+            'title': value + " Daily Confirmed and Death Chart"
+        }
+    }
+
+
+@app.callback(
+    Output('increase rate', 'figure'),
+    [Input('Region_of_interest', 'value')])
+def update_figure(value):
+    return {
+        "data": [{"x": load_date_list_2(value),
+                  "y": compute_increase_rate(value),
+                  'mode': "lines+markers",
+                  'name': value + " Confirmed"},
+                 {"x": load_date_list_2(value),
+                  "y": smooth_list(compute_increase_rate(value),
+                                   9,
+                                   2),
+                  'mode': 'lines+markers',
+                  'name': 'Smoothed Confirmed'},
+                 {"x": load_date_list_2(value),
+                  "y": compute_death_increase_rate(value),
+                  'mode': "lines+markers",
+                  'name': value + " Death"},
+                 {"x": load_date_list_2(value),
+                  "y": smooth_list(compute_death_increase_rate(value),
+                                   9,
+                                   2),
+                  'mode': "lines+markers",
+                  'name': 'Smoothed Death'},
+                 ],
+        'layout': {
+            'title': value + " Daily Confirmed and Death Increase Rate"
+        }
     }
 
 
