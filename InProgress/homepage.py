@@ -41,7 +41,7 @@ def compute_death_increase_rate(region='US'):
     data_list_deaths, date_list = utl.load_data_4(region)
     A = data_list_deaths
     # print("confirmed data is ", A)
-    rate = [(A[k + 1] - A[k]) / A[k] * 100 for k in range(0, len(A) - 1)]
+    rate = [(A[k + 1] - A[k]) / A[k] * 100 if A[k] > 0 else 0 for k in range(0, len(A) - 1)]
     return rate
 
 
@@ -82,7 +82,8 @@ def update_increase_rate_row(region="US"):
                                     'name': 'Smoothed Death'},
                                    ],
                           'layout': {
-                              'title': region + " Daily Confirmed and Death Increase Rate"
+                              'title': region + " Daily Confirmed and Death Increase Rate",
+                              'background': 0000,
                           }
                           }),
     ],
@@ -104,7 +105,8 @@ def confirmed_vs_death(region="US"):
                                     'name': 'Death Cases'},
                                    ],
                           'layout': {
-                              'title': region + " Daily Confirmed and Death Chart"
+                              'title': region + " Daily Confirmed and Death Chart",
+                              'background': 0000,
                           }
                           }),
     ],
@@ -113,30 +115,180 @@ def confirmed_vs_death(region="US"):
     ])
 
 
-# define the body layout
+def load_table():
+    return html.Div(
+        [
+            dbc.Row([
+                dbc.Col([
+                    html.Div(html.H1("CADSEA - Covid 19 Analysis")
+                             ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Div(html.P("Dashboard in Python")
+                             ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(["US Death", dbc.Badge(load_death_list("US")[-1], color="danger", className="ml-1"),
+                                     dbc.Badge("+" + str(load_death_list("US")[-1] - load_death_list("US")[-2]),
+                                               color="danger",
+                                               className="ml-1")]),
+                        ]
+                    ),
+                ]
+                ),
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(
+                                ["US Confirmed", dbc.Badge(load_case_list("US")[-1], color="warning", className="ml-1"),
+                                 dbc.Badge("+" + str(load_case_list("US")[-1] - load_case_list("US")[-2]),
+                                           color="warning",
+                                           className="ml-1")]),
+                        ]
+                    ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(["Italy Death",
+                                     dbc.Badge(load_death_list("Italy")[-1], color="danger", className="ml-1"),
+                                     dbc.Badge("+" + str(load_death_list("Italy")[-1] - load_death_list("Italy")[-2]),
+                                               color="danger",
+                                               className="ml-1")]),
+                        ]
+                    ),
+                ]
+                ),
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(
+                                ["Italy Confirmed",
+                                 dbc.Badge(load_case_list("Italy")[-1], color="warning", className="ml-1"),
+                                 dbc.Badge("+" + str(load_case_list("Italy")[-1] - load_case_list("Italy")[-2]),
+                                           color="warning",
+                                           className="ml-1")]),
+                        ]
+                    ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(["China Death",
+                                     dbc.Badge(load_death_list("China")[-1], color="danger", className="ml-1"),
+                                     dbc.Badge("+" + str(load_death_list("China")[-1] - load_death_list("China")[-2]),
+                                               color="danger",
+                                               className="ml-1")]),
+                        ]
+                    ),
+                ]
+                ),
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(
+                                ["China Confirmed",
+                                 dbc.Badge(load_case_list("China")[-1], color="warning", className="ml-1"),
+                                 dbc.Badge("+" + str(load_case_list("China")[-1] - load_case_list("China")[-2]),
+                                           color="warning",
+                                           className="ml-1")]),
+                        ]
+                    ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(["Canada Death",
+                                     dbc.Badge(load_death_list("Canada")[-1], color="danger", className="ml-1"),
+                                     dbc.Badge("+" + str(load_death_list("Canada")[-1] - load_death_list("Canada")[-2]),
+                                               color="danger",
+                                               className="ml-1")]),
+                        ]
+                    ),
+                ]
+                ),
+                dbc.Col([
+                    html.Span(
+                        [
+                            html.H5(
+                                ["Canada Confirmed",
+                                 dbc.Badge(load_case_list("Canada")[-1], color="warning", className="ml-1"),
+                                 dbc.Badge("+" + str(load_case_list("Canada")[-1] - load_case_list("Canada")[-2]),
+                                           color="warning",
+                                           className="ml-1")]),
+                        ]
+                    ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Div(html.H5("                     ")
+                             ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Div(html.H6("Choose a Region/Country: ")
+                             ),
+                ]
+                )
+            ]
+            ),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([dcc.Dropdown(
+                        id='Region_of_interest',
+                        options=[
+                            {'label': 'US', 'value': 'US'},
+                            {'label': 'Italy', 'value': 'Italy'},
+                            {'label': 'Canada', 'value': 'Canada'},
+                            {'label': 'China', 'value': 'China'}
+                        ],
+                        value='US',
+                        clearable=False,
+                    ),
+                    ],
 
+                    )
+                ]
+                )
+            ]
+            ),
+        ],
+        style={"border": "60px white solid"}  ##TODO
+    )
+
+
+# define the body layout
 def load_body():
     return html.Div(
-        [dbc.Row([dbc.Col([
-            html.Div([dcc.Dropdown(
-                id='Region_of_interest',
-                options=[
-                    {'label': 'US', 'value': 'US'},
-                    {'label': 'Italy', 'value': 'Italy'},
-                    {'label': 'Spain', 'value': 'Spain'}
-                ],
-                value='US',
-                clearable=False,
-                style={'width': '6px'} ##TODO
-
-            ),
-            ],
-            ),
-        ],
-        ),
-        ],
-        ),
-
+        [
             dbc.Row([
                 dbc.Col([
                     html.Div(confirmed_vs_death('US'),
@@ -153,7 +305,7 @@ def load_body():
             ]
             )
         ],
-        style={"border": "2px black solid"} ##TODO
+        style={"border": "20px white solid"}  ##TODO
     )
 
 
@@ -212,6 +364,7 @@ def update_figure(value):
 def load_layout():
     layout = html.Div([
         nav,
+        load_table(),
         load_body(),
     ])
     return layout
