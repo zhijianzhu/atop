@@ -19,7 +19,6 @@ from flask import jsonify
 import pgeocode
 import math
 
-
 df_conf = pd.read_csv('data/time_series_19-covid-Confirmed.csv')
 date_cols = [c for c in df_conf.columns if '/20' in c]
 
@@ -52,7 +51,7 @@ def dataSource(category: int) -> str:
     fn = dataSources.get(category)
 
     url_path = base_url + fn if fn else fn
-    #print("url path is ", url_path)
+    # print("url path is ", url_path)
 
     return url_path
 
@@ -78,7 +77,6 @@ def row_dist(r, zipinfo):
 
 
 def config_geo_layout():
-
     current_time = str(date.today())
 
     # print('reading the csv')
@@ -97,10 +95,10 @@ def config_geo_layout():
         # print(r['Province/State'])
         if str(r['Province/State']) != 'nan':
             return r['Province/State'] + '<br>' + \
-                'Confirmed: ' + str(r['total'])
+                   'Confirmed: ' + str(r['total'])
         else:
             return r['Country/Region'] + '<br>' + \
-                'Confirmed: ' + str(r['total'])
+                   'Confirmed: ' + str(r['total'])
 
     df_conf['text'] = df_conf.apply(get_text, axis=1)
     median_val = df_conf['total'].median()
@@ -111,10 +109,10 @@ def config_geo_layout():
         [
             0, "rgb(5, 10, 172)"], [
             0.35, "rgb(40, 60, 190)"], [
-                0.5, "rgb(70, 100, 245)"], [
-                    0.6, "rgb(90, 120, 245)"], [
-                        0.7, "rgb(106, 137, 247)"], [
-                            1, "rgb(240, 210, 250)"]]
+            0.5, "rgb(70, 100, 245)"], [
+            0.6, "rgb(90, 120, 245)"], [
+            0.7, "rgb(106, 137, 247)"], [
+            1, "rgb(240, 210, 250)"]]
 
     df_deaths['text'] = df_deaths.apply(get_text, axis=1)
 
@@ -122,10 +120,10 @@ def config_geo_layout():
         [
             0, "rgb(5, 10, 172)"], [
             0.35, "rgb(40, 60, 190)"], [
-                0.5, "rgb(70, 100, 245)"], [
-                    0.6, "rgb(90, 120, 245)"], [
-                        0.7, "rgb(106, 137, 247)"], [
-                            1, "rgb(220, 220, 220)"]]
+            0.5, "rgb(70, 100, 245)"], [
+            0.6, "rgb(90, 120, 245)"], [
+            0.7, "rgb(106, 137, 247)"], [
+            1, "rgb(220, 220, 220)"]]
 
     median_val_d = df_deaths['total'].median()
 
@@ -178,12 +176,11 @@ def config_geo_layout():
 
 
 def load_data():
-
     df_Confirmed = pd.read_csv(dataSource("Confirmed"))
     df_Deaths = pd.read_csv(dataSource("Deaths"))
     df_Recovered = pd.read_csv(dataSource("Recovered"))
 
-    #countries = df_Confirmed['Country/Region'].unique()
+    # countries = df_Confirmed['Country/Region'].unique()
 
     date_list = df_Confirmed.columns.to_list()
     date_list = date_list[34:]
@@ -200,7 +197,7 @@ def load_data():
     def update_number_by_region(df=df_Confirmed):
         data_list = []
         for region in region_of_interest:
-            #print("region is ", region)
+            # print("region is ", region)
             df_1 = df[df['Country/Region'] == region]
             df_1 = df_1.fillna(0)
 
@@ -223,12 +220,11 @@ def load_data():
 
 
 def load_data_2():
-
     df_Confirmed = pd.read_csv(dataSource("Confirmed"))
     df_Deaths = pd.read_csv(dataSource("Deaths"))
     df_Recovered = pd.read_csv(dataSource("Recovered"))
 
-    #countries = df_Confirmed['Country/Region'].unique()
+    # countries = df_Confirmed['Country/Region'].unique()
 
     date_list = df_Confirmed.columns.to_list()
 
@@ -239,14 +235,15 @@ def load_data_2():
         'United Kingdom',
         'Canada',
         'Iran',
-        'Spain']
+        'Spain',
+        'China']
 
     date_list = date_list[35:]
 
     def update_number_by_region(df=df_Confirmed):
         data_list = {}
         for region in region_of_interest:
-            #print("region is ", region)
+            # print("region is ", region)
             df_1 = df[df['Country/Region'] == region]
             df_1 = df_1.fillna(0)
 
@@ -265,7 +262,6 @@ def load_data_2():
 
 
 def load_data_3(region='US'):
-
     df_Confirmed = pd.read_csv(dataSource("Confirmed"))
 
     date_list = df_Confirmed.columns.to_list()
@@ -299,8 +295,41 @@ def load_data_3(region='US'):
     return data_list_confirmed, limited_date_list
 
 
-def organize_figure_structure(data):
+def load_data_4(region='US'):
+    df_Death = pd.read_csv(dataSource("Deaths"))
 
+    date_list = df_Death.columns.to_list()
+    if region == "US":
+        limited_date_list = date_list[45:]
+    elif region == "Italy":
+        limited_date_list = date_list[36:]
+    elif region == "China":
+        limited_date_list = date_list[4:]
+    else:
+        limited_date_list = date_list[36:]
+
+    def update_number_by_region(df=df_Death):
+
+        df_1 = df[df['Country/Region'] == region]
+        df_1 = df_1.fillna(0)
+
+        death_number = list(
+            np.sum(
+                np.array(
+                    df_1[limited_date_list]),
+                axis=0))
+        death_number = [int(x) for x in death_number]
+
+        return death_number
+
+    data_list_death = update_number_by_region(df_Death)
+
+    # print(data_list_confirmed)
+
+    return data_list_death, limited_date_list
+
+
+def organize_figure_structure(data):
     figure_data = {
         'data': data,
         'layout': {
@@ -314,7 +343,6 @@ def organize_figure_structure(data):
 
 
 def search_by_zipcode(zipcode="21029"):
-
     df_conf = pd.read_csv(dataSource("Confirmed"))
 
     date_cols = [c for c in df_conf.columns if '/20' in c]
@@ -358,10 +386,9 @@ def fetch_lat_long_by_name():
 
 
 if __name__ == "__main__":
-
     df_local, date_cols = search_by_zipcode()
 
     print(df_local)
 
-    #news_list = get_local_news_by_zipcode()
+    # news_list = get_local_news_by_zipcode()
     # print(news_list)
